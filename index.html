@@ -1,2118 +1,1278 @@
+
+
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CLEAN RIDE — Premium Vehicle Care</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link
-    href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Montserrat:wght@300;400;600;700&family=Space+Mono:wght@400;700&display=swap"
-    rel="stylesheet">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box
-    }
-
-    :root {
-      --cyan: #00e5ff;
-      --magenta: #ff006e;
-      --gold: #ffd700;
-      --dark: #020408;
-      --dark2: #060d14;
-      --dark3: #0a1520;
-      --glass: rgba(0, 229, 255, 0.04);
-      --glass-border: rgba(0, 229, 255, 0.12);
-      --font-display: 'Bebas Neue', sans-serif;
-      --font-body: 'Montserrat', sans-serif;
-      --font-mono: 'Space Mono', monospace;
-    }
-
-    html {
-      scroll-behavior: smooth
-    }
-
-    body {
-      background: var(--dark);
-      color: #fff;
-      font-family: var(--font-body);
-      overflow-x: hidden;
-      cursor: none;
-    }
-
-    #cursor {
-      position: fixed;
-      width: 12px;
-      height: 12px;
-      background: var(--cyan);
-      border-radius: 50%;
-      pointer-events: none;
-      z-index: 9999;
-      transform: translate(-50%, -50%);
-      transition: transform 0.1s, width 0.3s, height 0.3s, opacity 0.3s;
-      mix-blend-mode: difference;
-    }
-
-    #cursor-ring {
-      position: fixed;
-      width: 36px;
-      height: 36px;
-      border: 1px solid rgba(0, 229, 255, 0.5);
-      border-radius: 50%;
-      pointer-events: none;
-      z-index: 9998;
-      transform: translate(-50%, -50%);
-      transition: transform 0.15s ease-out, width 0.3s, height 0.3s;
-    }
-
-    #three-canvas {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      z-index: 0;
-    }
-
-    #scroll-container {
-      position: relative;
-      z-index: 10;
-      pointer-events: none;
-    }
-
-    .page-section {
-      height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      position: relative;
-      pointer-events: none;
-    }
-
-    .page-section.interactive {
-      pointer-events: all
-    }
-
-    #nav {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      z-index: 100;
-      padding: 28px 48px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      pointer-events: all;
-    }
-
-    .nav-logo {
-      font-family: var(--font-display);
-      font-size: 1.6rem;
-      letter-spacing: 0.15em;
-      color: #fff;
-      text-decoration: none;
-    }
-
-    .nav-logo span {
-      color: var(--cyan)
-    }
-
-    .nav-links {
-      display: flex;
-      gap: 32px;
-      list-style: none
-    }
-
-    .nav-links a {
-      font-size: 0.7rem;
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
-      color: rgba(255, 255, 255, 0.5);
-      text-decoration: none;
-      transition: color 0.3s;
-      font-weight: 600;
-    }
-
-    .nav-links a:hover {
-      color: var(--cyan)
-    }
-
-    .nav-cta {
-      padding: 10px 24px;
-      border: 1px solid var(--glass-border);
-      background: var(--glass);
-      color: var(--cyan);
-      font-size: 0.65rem;
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
-      font-weight: 700;
-      cursor: none;
-      backdrop-filter: blur(12px);
-      transition: all 0.3s;
-      font-family: var(--font-body);
-    }
-
-    .nav-cta:hover {
-      background: var(--cyan);
-      color: #000;
-      border-color: var(--cyan)
-    }
-
-    #page1 {
-      justify-content: flex-end;
-      padding-bottom: 80px
-    }
-
-    .hero-content {
-      position: absolute;
-      bottom: 10%;
-      left: 8%;
-      max-width: 600px;
-    }
-
-    .hero-label {
-      font-family: var(--font-mono);
-      font-size: 0.65rem;
-      letter-spacing: 0.4em;
-      color: var(--cyan);
-      text-transform: uppercase;
-      margin-bottom: 16px;
-      opacity: 0;
-    }
-
-    .hero-title {
-      font-family: var(--font-display);
-      font-size: clamp(4rem, 10vw, 9rem);
-      line-height: 0.92;
-      letter-spacing: 0.03em;
-      color: #fff;
-      opacity: 0;
-    }
-
-    .hero-title .stroke {
-      -webkit-text-stroke: 2px var(--cyan);
-      color: transparent;
-    }
-
-    .hero-sub {
-      margin-top: 24px;
-      font-size: 0.8rem;
-      line-height: 1.9;
-      color: rgba(255, 255, 255, 0.45);
-      max-width: 380px;
-      opacity: 0;
-      font-weight: 300;
-      letter-spacing: 0.03em;
-    }
-
-    .hero-stats {
-      display: flex;
-      gap: 40px;
-      margin-top: 40px;
-      opacity: 0;
-    }
-
-    .stat-item {
-      border-left: 1px solid var(--glass-border);
-      padding-left: 16px
-    }
-
-    .stat-num {
-      font-family: var(--font-display);
-      font-size: 2rem;
-      letter-spacing: 0.05em;
-      color: #fff;
-    }
-
-    .stat-label {
-      font-size: 0.6rem;
-      letter-spacing: 0.25em;
-      color: rgba(255, 255, 255, 0.35);
-      text-transform: uppercase;
-      font-weight: 600;
-      margin-top: 2px;
-    }
-
-    .scroll-indicator {
-      position: absolute;
-      bottom: 10%;
-      right: 8%;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 12px;
-      opacity: 0;
-    }
-
-    .scroll-indicator span {
-      font-family: var(--font-mono);
-      font-size: 0.6rem;
-      letter-spacing: 0.3em;
-      color: rgba(255, 255, 255, 0.3);
-      text-transform: uppercase;
-      writing-mode: vertical-rl;
-    }
-
-    .scroll-line {
-      width: 1px;
-      height: 60px;
-      background: linear-gradient(to bottom, var(--cyan), transparent);
-      animation: scrollPulse 2s ease-in-out infinite;
-    }
-
-    @keyframes scrollPulse {
-
-      0%,
-      100% {
-        opacity: 0.3;
-        transform: scaleY(1)
-      }
-
-      50% {
-        opacity: 1;
-        transform: scaleY(1.2)
-      }
-    }
-
-    #page2 {}
-
-    .explosion-label {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      font-family: var(--font-display);
-      font-size: clamp(5rem, 14vw, 13rem);
-      letter-spacing: 0.1em;
-      -webkit-text-stroke: 2px rgba(0, 229, 255, 0.6);
-      color: transparent;
-      text-shadow: 0 0 80px rgba(0, 229, 255, 0.2);
-      white-space: nowrap;
-      opacity: 0;
-      pointer-events: none;
-      text-align: center;
-      line-height: 1;
-    }
-
-    .detail-panel {
-      position: absolute;
-      background: rgba(6, 13, 20, 0.75);
-      border: 1px solid var(--glass-border);
-      backdrop-filter: blur(20px);
-      padding: 20px 24px;
-      width: 220px;
-      opacity: 0;
-    }
-
-    .detail-panel::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 2px;
-      background: linear-gradient(to right, var(--cyan), transparent);
-    }
-
-    .dp-tag {
-      font-family: var(--font-mono);
-      font-size: 0.55rem;
-      letter-spacing: 0.3em;
-      color: var(--cyan);
-      text-transform: uppercase;
-      margin-bottom: 8px;
-    }
-
-    .dp-title {
-      font-family: var(--font-display);
-      font-size: 1.4rem;
-      letter-spacing: 0.08em;
-      color: #fff;
-      line-height: 1;
-    }
-
-    .dp-sub {
-      font-size: 0.65rem;
-      color: rgba(255, 255, 255, 0.4);
-      margin-top: 8px;
-      line-height: 1.7;
-      font-weight: 300;
-    }
-
-    .dp-value {
-      margin-top: 12px;
-      font-family: var(--font-mono);
-      font-size: 1rem;
-      color: var(--cyan);
-    }
-
-    #dp1 {
-      top: 20%;
-      left: 4%
-    }
-
-    #dp2 {
-      top: 20%;
-      right: 4%
-    }
-
-    #dp3 {
-      bottom: 20%;
-      left: 4%
-    }
-
-    #dp4 {
-      bottom: 20%;
-      right: 4%
-    }
-
-    #page3 {}
-
-    .mission-center {
-      text-align: center;
-      opacity: 0;
-    }
-
-    .mission-eyebrow {
-      font-family: var(--font-mono);
-      font-size: 0.6rem;
-      letter-spacing: 0.5em;
-      color: var(--cyan);
-      text-transform: uppercase;
-      margin-bottom: 20px;
-    }
-
-    .mission-headline {
-      font-family: var(--font-display);
-      font-size: clamp(2.5rem, 7vw, 6.5rem);
-      line-height: 1;
-      letter-spacing: 0.08em;
-      color: #fff;
-    }
-
-    .mission-headline em {
-      font-style: normal;
-      -webkit-text-stroke: 2px var(--cyan);
-      color: transparent;
-    }
-
-    .mission-body {
-      max-width: 500px;
-      margin: 28px auto 0;
-      font-size: 0.82rem;
-      line-height: 1.9;
-      color: rgba(255, 255, 255, 0.4);
-      font-weight: 300;
-    }
-
-    .services-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 1px;
-      background: var(--glass-border);
-      margin-top: 48px;
-      width: 700px;
-      opacity: 0;
-    }
-
-    .service-item {
-      background: var(--dark2);
-      padding: 28px 24px;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .service-item::after {
-      content: '';
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      width: 0;
-      height: 2px;
-      background: var(--cyan);
-      transition: width 0.4s;
-    }
-
-    .service-item:hover::after {
-      width: 100%
-    }
-
-    .si-num {
-      font-family: var(--font-display);
-      font-size: 2.5rem;
-      color: rgba(255, 255, 255, 0.06);
-      line-height: 1;
-    }
-
-    .si-name {
-      font-family: var(--font-display);
-      font-size: 1.1rem;
-      letter-spacing: 0.1em;
-      color: #fff;
-      margin-top: 4px;
-    }
-
-    .si-desc {
-      font-size: 0.65rem;
-      color: rgba(255, 255, 255, 0.35);
-      margin-top: 8px;
-      line-height: 1.6;
-      font-weight: 300;
-    }
-
-    .si-price {
-      font-family: var(--font-mono);
-      font-size: 0.8rem;
-      color: var(--cyan);
-      margin-top: 12px;
-    }
-
-    #page4 {
-      background: transparent
-    }
-
-    .form-overlay {
-      width: min(640px, 92vw);
-      background: rgba(6, 13, 20, 0.92);
-      border: 1px solid var(--glass-border);
-      backdrop-filter: blur(40px);
-      padding: 48px 52px;
-      opacity: 0;
-      position: relative;
-      pointer-events: all;
-    }
-
-    .form-overlay::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 2px;
-      background: linear-gradient(to right, transparent, var(--cyan), transparent);
-    }
-
-    .form-title {
-      font-family: var(--font-display);
-      font-size: 2.2rem;
-      letter-spacing: 0.1em;
-      color: #fff;
-    }
-
-    .form-sub {
-      font-size: 0.72rem;
-      color: rgba(255, 255, 255, 0.35);
-      margin-top: 6px;
-      font-weight: 300;
-      letter-spacing: 0.05em;
-    }
-
-    .form-divider {
-      width: 40px;
-      height: 2px;
-      background: var(--cyan);
-      margin: 20px 0;
-    }
-
-    .form-row {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 16px;
-      margin-bottom: 16px
-    }
-
-    .form-row.single {
-      grid-template-columns: 1fr
-    }
-
-    .form-row.triple {
-      grid-template-columns: 1fr 1fr 1fr
-    }
-
-    .field-group {
-      display: flex;
-      flex-direction: column;
-      gap: 7px
-    }
-
-    .field-label {
-      font-family: var(--font-mono);
-      font-size: 0.55rem;
-      letter-spacing: 0.25em;
-      color: rgba(255, 255, 255, 0.4);
-      text-transform: uppercase;
-    }
-
-    .field-input,
-    select.field-input {
-      background: rgba(255, 255, 255, 0.04);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      color: #fff;
-      padding: 12px 14px;
-      font-family: var(--font-body);
-      font-size: 0.82rem;
-      outline: none;
-      transition: border-color 0.3s, background 0.3s;
-      -webkit-appearance: none;
-    }
-
-    .field-input::placeholder {
-      color: rgba(255, 255, 255, 0.2)
-    }
-
-    .field-input:focus {
-      border-color: var(--cyan);
-      background: rgba(0, 229, 255, 0.04);
-    }
-
-    select.field-input option {
-      background: #060d14;
-      color: #fff
-    }
-
-    .service-chips {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-      margin-bottom: 16px
-    }
-
-    .chip {
-      padding: 8px 16px;
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      background: transparent;
-      color: rgba(255, 255, 255, 0.5);
-      font-family: var(--font-mono);
-      font-size: 0.6rem;
-      letter-spacing: 0.15em;
-      text-transform: uppercase;
-      cursor: none;
-      transition: all 0.25s;
-    }
-
-    .chip:hover,
-    .chip.active {
-      border-color: var(--cyan);
-      background: rgba(0, 229, 255, 0.08);
-      color: var(--cyan);
-    }
-
-    .submit-btn {
-      width: 100%;
-      padding: 16px;
-      margin-top: 24px;
-      background: var(--cyan);
-      color: #000;
-      font-family: var(--font-display);
-      font-size: 1.1rem;
-      letter-spacing: 0.2em;
-      border: none;
-      cursor: none;
-      transition: all 0.3s;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .submit-btn::before {
-      content: '';
-      position: absolute;
-      top: 50%;
-      left: -100%;
-      width: 100%;
-      height: 200%;
-      background: rgba(255, 255, 255, 0.15);
-      transform: translateY(-50%) skewX(-20deg);
-      transition: left 0.4s;
-    }
-
-    .submit-btn:hover::before {
-      left: 100%
-    }
-
-    .submit-btn:hover {
-      background: #fff;
-      letter-spacing: 0.3em
-    }
-
-    #page5 {}
-
-    .ai-container {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 40px;
-      opacity: 0;
-    }
-
-    .radar-wrap {
-      position: relative;
-      width: 260px;
-      height: 260px
-    }
-
-    .radar-svg {
-      width: 100%;
-      height: 100%
-    }
-
-    .radar-sweep {
-      transform-origin: 50% 50%;
-      animation: sweep 3s linear infinite;
-    }
-
-    @keyframes sweep {
-      to {
-        transform: rotate(360deg)
-      }
-    }
-
-    .radar-ping {
-      animation: ping 3s ease-out infinite;
-      transform-origin: center;
-    }
-
-    @keyframes ping {
-      0% {
-        opacity: 1;
-        r: 4
-      }
-
-      100% {
-        opacity: 0;
-        r: 20
-      }
-    }
-
-    .ai-status {
-      text-align: center
-    }
-
-    .ai-title {
-      font-family: var(--font-display);
-      font-size: 2rem;
-      letter-spacing: 0.1em;
-      color: #fff;
-    }
-
-    .ai-dots span {
-      display: inline-block;
-      width: 4px;
-      height: 4px;
-      background: var(--cyan);
-      border-radius: 50%;
-      margin: 0 3px;
-      animation: blink 1.4s infinite;
-    }
-
-    .ai-dots span:nth-child(2) {
-      animation-delay: 0.2s
-    }
-
-    .ai-dots span:nth-child(3) {
-      animation-delay: 0.4s
-    }
-
-    @keyframes blink {
-
-      0%,
-      80%,
-      100% {
-        opacity: 0
-      }
-
-      40% {
-        opacity: 1
-      }
-    }
-
-    .ai-log {
-      font-family: var(--font-mono);
-      font-size: 0.6rem;
-      color: rgba(0, 229, 255, 0.5);
-      letter-spacing: 0.1em;
-      line-height: 1.9;
-      text-align: left;
-      width: 320px;
-      border-left: 1px solid var(--glass-border);
-      padding-left: 16px;
-    }
-
-    .ai-log-line {
-      opacity: 0;
-      animation: logIn 0.3s ease forwards;
-    }
-
-    .ai-log-line.ok::before {
-      content: '✓  ';
-      color: #00e676
-    }
-
-    .ai-log-line.scan::before {
-      content: '→  ';
-      color: var(--cyan)
-    }
-
-    @keyframes logIn {
-      to {
-        opacity: 1
-      }
-    }
-
-    #page6 {}
-
-    .confirm-card {
-      width: min(680px, 94vw);
-      opacity: 0;
-      pointer-events: all;
-    }
-
-    .confirm-header {
-      background: var(--cyan);
-      padding: 28px 36px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-
-    .confirm-header-title {
-      font-family: var(--font-display);
-      font-size: 1.8rem;
-      letter-spacing: 0.12em;
-      color: #000;
-    }
-
-    .confirm-badge {
-      background: #000;
-      color: var(--cyan);
-      padding: 6px 16px;
-      font-family: var(--font-mono);
-      font-size: 0.6rem;
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
-    }
-
-    .confirm-body {
-      background: rgba(6, 13, 20, 0.96);
-      border: 1px solid var(--glass-border);
-      border-top: none;
-      padding: 36px;
-    }
-
-    .confirm-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 24px;
-      margin-bottom: 28px
-    }
-
-    .cg-block {}
-
-    .cg-label {
-      font-family: var(--font-mono);
-      font-size: 0.55rem;
-      letter-spacing: 0.3em;
-      color: rgba(255, 255, 255, 0.3);
-      text-transform: uppercase;
-      margin-bottom: 6px;
-    }
-
-    .cg-value {
-      font-size: 0.85rem;
-      color: #fff;
-      font-weight: 300;
-      letter-spacing: 0.03em;
-    }
-
-    .cg-value strong {
-      font-weight: 600;
-      color: var(--cyan)
-    }
-
-    .price-breakdown {
-      border-top: 1px solid var(--glass-border);
-      padding-top: 24px;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
-    .price-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .price-row-label {
-      font-size: 0.75rem;
-      color: rgba(255, 255, 255, 0.4);
-      font-weight: 300;
-    }
-
-    .price-row-val {
-      font-family: var(--font-mono);
-      font-size: 0.8rem;
-      color: #fff;
-    }
-
-    .price-total {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      border-top: 1px solid var(--glass-border);
-      padding-top: 16px;
-      margin-top: 6px;
-    }
-
-    .price-total-label {
-      font-family: var(--font-display);
-      font-size: 1.2rem;
-      letter-spacing: 0.1em;
-      color: #fff;
-    }
-
-    .price-total-val {
-      font-family: var(--font-display);
-      font-size: 2rem;
-      letter-spacing: 0.05em;
-      color: var(--cyan);
-    }
-
-    .confirm-actions {
-      display: flex;
-      gap: 12px;
-      margin-top: 28px;
-    }
-
-    .btn-primary {
-      flex: 1;
-      padding: 15px;
-      background: var(--cyan);
-      color: #000;
-      font-family: var(--font-display);
-      font-size: 1rem;
-      letter-spacing: 0.2em;
-      border: none;
-      cursor: none;
-      transition: all 0.3s;
-    }
-
-    .btn-primary:hover {
-      background: #fff
-    }
-
-    .btn-secondary {
-      padding: 15px 24px;
-      border: 1px solid var(--glass-border);
-      background: transparent;
-      color: rgba(255, 255, 255, 0.5);
-      font-family: var(--font-mono);
-      font-size: 0.65rem;
-      letter-spacing: 0.15em;
-      cursor: none;
-      transition: all 0.3s;
-    }
-
-    .btn-secondary:hover {
-      border-color: var(--cyan);
-      color: var(--cyan)
-    }
-
-    #progress-bar {
-      position: fixed;
-      top: 0;
-      left: 0;
-      height: 2px;
-      z-index: 200;
-      background: linear-gradient(to right, transparent, var(--cyan));
-      width: 0%;
-      transition: width 0.1s;
-    }
-
-    #page-dots {
-      position: fixed;
-      right: 36px;
-      top: 50%;
-      transform: translateY(-50%);
-      z-index: 100;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-
-    .dot {
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      background: rgba(255, 255, 255, 0.2);
-      transition: all 0.4s;
-      cursor: none;
-    }
-
-    .dot.active {
-      background: var(--cyan);
-      box-shadow: 0 0 10px var(--cyan);
-      transform: scale(1.4);
-    }
-
-    #noise {
-      position: fixed;
-      inset: 0;
-      z-index: 1;
-      pointer-events: none;
-      opacity: 0.03;
-      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
-    }
-
-    #loader {
-      position: fixed;
-      inset: 0;
-      z-index: 1000;
-      background: var(--dark);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 24px;
-    }
-
-    .loader-logo {
-      font-family: var(--font-display);
-      font-size: 4rem;
-      letter-spacing: 0.2em;
-      color: #fff;
-    }
-
-    .loader-logo span {
-      color: var(--cyan)
-    }
-
-    .loader-bar-wrap {
-      width: 240px;
-      height: 1px;
-      background: rgba(255, 255, 255, 0.1);
-    }
-
-    .loader-bar {
-      height: 100%;
-      background: var(--cyan);
-      width: 0%;
-      transition: width 0.05s linear;
-    }
-
-    .loader-text {
-      font-family: var(--font-mono);
-      font-size: 0.6rem;
-      letter-spacing: 0.3em;
-      color: rgba(255, 255, 255, 0.3);
-      text-transform: uppercase;
-    }
-
-    /* ── PAGE 7: BIKE FORM (NEW) ── */
-    #page-7 {}
-
-    .bike-form-overlay {
-      width: min(680px, 92vw);
-      background: rgba(6, 13, 20, 0.92);
-      border: 1px solid rgba(255, 0, 110, 0.2);
-      backdrop-filter: blur(40px);
-      padding: 44px 52px;
-      opacity: 0;
-      position: relative;
-      pointer-events: all;
-      max-height: 90vh;
-      overflow-y: auto;
-    }
-
-    .bike-form-overlay::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 2px;
-      background: linear-gradient(to right, transparent, var(--magenta), transparent);
-    }
-
-    .bike-type-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 10px;
-      margin-bottom: 18px;
-    }
-
-    .btc {
-      background: rgba(255, 255, 255, 0.03);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      padding: 16px 12px;
-      text-align: center;
-      cursor: none;
-      transition: all 0.25s;
-    }
-
-    .btc:hover,
-    .btc.active {
-      border-color: var(--magenta);
-      background: rgba(255, 0, 110, 0.08);
-    }
-
-    .btc-icon {
-      font-size: 22px;
-      display: block;
-      margin-bottom: 8px
-    }
-
-    .btc-name {
-      font-family: var(--font-display);
-      font-size: 0.9rem;
-      letter-spacing: 0.1em;
-      color: #fff
-    }
-
-    .btc-sub {
-      font-size: 0.58rem;
-      color: rgba(255, 255, 255, 0.3);
-      margin-top: 3px
-    }
-
-    .btc.active .btc-name {
-      color: var(--magenta)
-    }
-
-    .chip.mag:hover,
-    .chip.mag.active {
-      border-color: var(--magenta);
-      background: rgba(255, 0, 110, 0.08);
-      color: var(--magenta);
-    }
-
-    .submit-btn-mag {
-      width: 100%;
-      padding: 16px;
-      margin-top: 24px;
-      background: var(--magenta);
-      color: #fff;
-      font-family: var(--font-display);
-      font-size: 1.1rem;
-      letter-spacing: 0.2em;
-      border: none;
-      cursor: none;
-      transition: all 0.3s;
-    }
-
-    .submit-btn-mag:hover {
-      background: #fff;
-      color: var(--magenta);
-      letter-spacing: 0.3em
-    }
-
-    .form-divider-mag {
-      width: 40px;
-      height: 2px;
-      background: var(--magenta);
-      margin: 20px 0
-    }
-
-    /* ── PAGE 8: THANK YOU (NEW) ── */
-    #page-8 {}
-
-    .thankyou-wrap {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      text-align: center;
-      opacity: 0;
-      pointer-events: all;
-    }
-
-    .ty-ring {
-      width: 88px;
-      height: 88px;
-      border: 2px solid var(--cyan);
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin: 0 auto 28px;
-      position: relative;
-      animation: tyPulse 2.5s ease-in-out infinite;
-    }
-
-    @keyframes tyPulse {
-
-      0%,
-      100% {
-        box-shadow: 0 0 0 0 rgba(0, 229, 255, 0.35)
-      }
-
-      50% {
-        box-shadow: 0 0 0 20px rgba(0, 229, 255, 0)
-      }
-    }
-
-    .ty-check svg {
-      width: 38px;
-      height: 38px
-    }
-
-    .ty-title {
-      font-family: var(--font-display);
-      font-size: clamp(3.5rem, 12vw, 9rem);
-      line-height: 0.9;
-      letter-spacing: 0.06em;
-      color: #fff;
-    }
-
-    .ty-title .ty-stroke {
-      -webkit-text-stroke: 2px var(--cyan);
-      color: transparent;
-    }
-
-    .ty-sub {
-      font-size: 0.82rem;
-      color: rgba(255, 255, 255, 0.4);
-      max-width: 440px;
-      margin: 22px auto 0;
-      line-height: 1.9;
-      font-weight: 300;
-    }
-
-    .ty-ref {
-      font-family: var(--font-mono);
-      font-size: 0.65rem;
-      letter-spacing: 0.3em;
-      color: var(--cyan);
-      margin-top: 22px;
-      padding: 10px 20px;
-      border: 1px solid var(--glass-border);
-      display: inline-block;
-    }
-
-    .ty-steps {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 12px;
-      margin-top: 40px;
-      width: min(720px, 90vw);
-    }
-
-    .ty-step {
-      background: rgba(6, 13, 20, 0.8);
-      border: 1px solid var(--glass-border);
-      padding: 18px 14px;
-      text-align: center;
-      position: relative;
-    }
-
-    .ty-step::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 2px;
-      background: linear-gradient(to right, var(--cyan), transparent);
-    }
-
-    .ty-step-num {
-      font-family: var(--font-display);
-      font-size: 2rem;
-      color: rgba(0, 229, 255, 0.18)
-    }
-
-    .ty-step-label {
-      font-size: 0.6rem;
-      letter-spacing: 0.12em;
-      color: rgba(255, 255, 255, 0.4);
-      text-transform: uppercase;
-      margin-top: 5px;
-      line-height: 1.5
-    }
-
-    .ty-actions {
-      display: flex;
-      gap: 12px;
-      margin-top: 36px;
-      justify-content: center
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CLEAN RIDE — Premium Vehicle Care</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Montserrat:wght@300;400;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --cyan:#00e5ff;--magenta:#ff006e;--gold:#ffd700;
+  --dark:#020408;--dark2:#060d14;--dark3:#0a1520;
+  --glass:rgba(0,229,255,0.04);--glass-border:rgba(0,229,255,0.12);
+  --font-display:'Bebas Neue',sans-serif;
+  --font-body:'Montserrat',sans-serif;
+  --font-mono:'Space Mono',monospace;
+}
+html{scroll-behavior:smooth}
+body{
+  background:var(--dark);
+  color:#fff;
+  font-family:var(--font-body);
+  overflow-x:hidden;
+  cursor:none;
+}
+
+/* CUSTOM CURSOR */
+#cursor{
+  position:fixed;width:12px;height:12px;
+  background:var(--cyan);border-radius:50%;
+  pointer-events:none;z-index:9999;
+  transform:translate(-50%,-50%);
+  transition:transform 0.1s,width 0.3s,height 0.3s,opacity 0.3s;
+  mix-blend-mode:difference;
+}
+#cursor-ring{
+  position:fixed;width:36px;height:36px;
+  border:1px solid rgba(0,229,255,0.5);border-radius:50%;
+  pointer-events:none;z-index:9998;
+  transform:translate(-50%,-50%);
+  transition:transform 0.15s ease-out,width 0.3s,height 0.3s;
+}
+
+/* CANVAS */
+#three-canvas{
+  position:fixed;top:0;left:0;
+  width:100%;height:100%;z-index:0;
+}
+
+/* SCROLL CONTAINER */
+#scroll-container{
+  position:relative;z-index:10;
+  pointer-events:none;
+}
+.page-section{
+  height:100vh;
+  display:flex;align-items:center;justify-content:center;
+  position:relative;
+  pointer-events:none;
+}
+.page-section.interactive{pointer-events:all}
+
+/* NAV */
+#nav{
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  padding:28px 48px;
+  display:flex;align-items:center;justify-content:space-between;
+  pointer-events:all;
+}
+.nav-logo{
+  font-family:var(--font-display);
+  font-size:1.6rem;letter-spacing:0.15em;
+  color:#fff;text-decoration:none;
+}
+.nav-logo span{color:var(--cyan)}
+.nav-links{display:flex;gap:32px;list-style:none}
+.nav-links a{
+  font-size:0.7rem;letter-spacing:0.2em;text-transform:uppercase;
+  color:rgba(255,255,255,0.5);text-decoration:none;
+  transition:color 0.3s;font-weight:600;
+}
+.nav-links a:hover{color:var(--cyan)}
+.nav-cta{
+  padding:10px 24px;
+  border:1px solid var(--glass-border);
+  background:var(--glass);
+  color:var(--cyan);
+  font-size:0.65rem;letter-spacing:0.2em;text-transform:uppercase;
+  font-weight:700;cursor:none;
+  backdrop-filter:blur(12px);
+  transition:all 0.3s;font-family:var(--font-body);
+}
+.nav-cta:hover{background:var(--cyan);color:#000;border-color:var(--cyan)}
+
+/* PAGE 1 — HERO */
+#page1{justify-content:flex-end;padding-bottom:80px}
+.hero-content{
+  position:absolute;bottom:10%;left:8%;
+  max-width:600px;
+}
+.hero-label{
+  font-family:var(--font-mono);font-size:0.65rem;
+  letter-spacing:0.4em;color:var(--cyan);
+  text-transform:uppercase;margin-bottom:16px;
+  opacity:0;
+}
+.hero-title{
+  font-family:var(--font-display);
+  font-size:clamp(4rem,10vw,9rem);
+  line-height:0.92;letter-spacing:0.03em;
+  color:#fff;opacity:0;
+}
+.hero-title .stroke{
+  -webkit-text-stroke:2px var(--cyan);
+  color:transparent;
+}
+.hero-sub{
+  margin-top:24px;
+  font-size:0.8rem;line-height:1.9;
+  color:rgba(255,255,255,0.45);
+  max-width:380px;opacity:0;
+  font-weight:300;letter-spacing:0.03em;
+}
+.hero-stats{
+  display:flex;gap:40px;margin-top:40px;opacity:0;
+}
+.stat-item{border-left:1px solid var(--glass-border);padding-left:16px}
+.stat-num{
+  font-family:var(--font-display);font-size:2rem;
+  letter-spacing:0.05em;color:#fff;
+}
+.stat-label{
+  font-size:0.6rem;letter-spacing:0.25em;
+  color:rgba(255,255,255,0.35);text-transform:uppercase;
+  font-weight:600;margin-top:2px;
+}
+.scroll-indicator{
+  position:absolute;bottom:10%;right:8%;
+  display:flex;flex-direction:column;align-items:center;gap:12px;
+  opacity:0;
+}
+.scroll-indicator span{
+  font-family:var(--font-mono);font-size:0.6rem;
+  letter-spacing:0.3em;color:rgba(255,255,255,0.3);
+  text-transform:uppercase;
+  writing-mode:vertical-rl;
+}
+.scroll-line{
+  width:1px;height:60px;
+  background:linear-gradient(to bottom,var(--cyan),transparent);
+  animation:scrollPulse 2s ease-in-out infinite;
+}
+@keyframes scrollPulse{
+  0%,100%{opacity:0.3;transform:scaleY(1)}
+  50%{opacity:1;transform:scaleY(1.2)}
+}
+
+/* PAGE 2 — EXPLOSION */
+#page2{}
+.explosion-label{
+  position:absolute;top:50%;left:50%;
+  transform:translate(-50%,-50%);
+  font-family:var(--font-display);
+  font-size:clamp(5rem,14vw,13rem);
+  letter-spacing:0.1em;
+  -webkit-text-stroke:2px rgba(0,229,255,0.6);
+  color:transparent;
+  text-shadow:0 0 80px rgba(0,229,255,0.2);
+  white-space:nowrap;
+  opacity:0;pointer-events:none;
+  text-align:center;line-height:1;
+}
+.detail-panel{
+  position:absolute;
+  background:rgba(6,13,20,0.75);
+  border:1px solid var(--glass-border);
+  backdrop-filter:blur(20px);
+  padding:20px 24px;
+  width:220px;opacity:0;
+}
+.detail-panel::before{
+  content:'';position:absolute;
+  top:0;left:0;right:0;height:2px;
+  background:linear-gradient(to right,var(--cyan),transparent);
+}
+.dp-tag{
+  font-family:var(--font-mono);font-size:0.55rem;
+  letter-spacing:0.3em;color:var(--cyan);
+  text-transform:uppercase;margin-bottom:8px;
+}
+.dp-title{
+  font-family:var(--font-display);font-size:1.4rem;
+  letter-spacing:0.08em;color:#fff;line-height:1;
+}
+.dp-sub{
+  font-size:0.65rem;color:rgba(255,255,255,0.4);
+  margin-top:8px;line-height:1.7;font-weight:300;
+}
+.dp-value{
+  margin-top:12px;
+  font-family:var(--font-mono);font-size:1rem;
+  color:var(--cyan);
+}
+#dp1{top:20%;left:4%}
+#dp2{top:20%;right:4%}
+#dp3{bottom:20%;left:4%}
+#dp4{bottom:20%;right:4%}
+
+/* PAGE 3 — MISSION */
+#page3{}
+.mission-center{
+  text-align:center;
+  opacity:0;
+}
+.mission-eyebrow{
+  font-family:var(--font-mono);font-size:0.6rem;
+  letter-spacing:0.5em;color:var(--cyan);
+  text-transform:uppercase;margin-bottom:20px;
+}
+.mission-headline{
+  font-family:var(--font-display);
+  font-size:clamp(2.5rem,7vw,6.5rem);
+  line-height:1;letter-spacing:0.08em;
+  color:#fff;
+}
+.mission-headline em{
+  font-style:normal;
+  -webkit-text-stroke:2px var(--cyan);
+  color:transparent;
+}
+.mission-body{
+  max-width:500px;margin:28px auto 0;
+  font-size:0.82rem;line-height:1.9;
+  color:rgba(255,255,255,0.4);font-weight:300;
+}
+.services-grid{
+  display:grid;grid-template-columns:repeat(3,1fr);
+  gap:1px;background:var(--glass-border);
+  margin-top:48px;width:700px;
+  opacity:0;
+}
+.service-item{
+  background:var(--dark2);
+  padding:28px 24px;
+  position:relative;overflow:hidden;
+}
+.service-item::after{
+  content:'';position:absolute;
+  bottom:0;left:0;width:0;height:2px;
+  background:var(--cyan);
+  transition:width 0.4s;
+}
+.service-item:hover::after{width:100%}
+.si-num{
+  font-family:var(--font-display);font-size:2.5rem;
+  color:rgba(255,255,255,0.06);line-height:1;
+}
+.si-name{
+  font-family:var(--font-display);font-size:1.1rem;
+  letter-spacing:0.1em;color:#fff;margin-top:4px;
+}
+.si-desc{
+  font-size:0.65rem;color:rgba(255,255,255,0.35);
+  margin-top:8px;line-height:1.6;font-weight:300;
+}
+.si-price{
+  font-family:var(--font-mono);font-size:0.8rem;
+  color:var(--cyan);margin-top:12px;
+}
+
+/* PAGE 4 — BOOKING FORM */
+#page4{background:transparent}
+.form-overlay{
+  width:min(640px,92vw);
+  background:rgba(6,13,20,0.92);
+  border:1px solid var(--glass-border);
+  backdrop-filter:blur(40px);
+  padding:48px 52px;
+  opacity:0;
+  position:relative;
+  pointer-events:all;
+}
+.form-overlay::before{
+  content:'';position:absolute;
+  top:0;left:0;right:0;height:2px;
+  background:linear-gradient(to right,transparent,var(--cyan),transparent);
+}
+.form-title{
+  font-family:var(--font-display);
+  font-size:2.2rem;letter-spacing:0.1em;
+  color:#fff;
+}
+.form-sub{
+  font-size:0.72rem;color:rgba(255,255,255,0.35);
+  margin-top:6px;font-weight:300;letter-spacing:0.05em;
+}
+.form-divider{
+  width:40px;height:2px;
+  background:var(--cyan);margin:20px 0;
+}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
+.form-row.single{grid-template-columns:1fr}
+.form-row.triple{grid-template-columns:1fr 1fr 1fr}
+.field-group{display:flex;flex-direction:column;gap:7px}
+.field-label{
+  font-family:var(--font-mono);font-size:0.55rem;
+  letter-spacing:0.25em;color:rgba(255,255,255,0.4);
+  text-transform:uppercase;
+}
+.field-input,select.field-input{
+  background:rgba(255,255,255,0.04);
+  border:1px solid rgba(255,255,255,0.1);
+  color:#fff;
+  padding:12px 14px;
+  font-family:var(--font-body);font-size:0.82rem;
+  outline:none;transition:border-color 0.3s,background 0.3s;
+  -webkit-appearance:none;
+}
+.field-input::placeholder{color:rgba(255,255,255,0.2)}
+.field-input:focus{
+  border-color:var(--cyan);
+  background:rgba(0,229,255,0.04);
+}
+select.field-input option{background:#060d14;color:#fff}
+.service-chips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+.chip{
+  padding:8px 16px;
+  border:1px solid rgba(255,255,255,0.1);
+  background:transparent;color:rgba(255,255,255,0.5);
+  font-family:var(--font-mono);font-size:0.6rem;
+  letter-spacing:0.15em;text-transform:uppercase;
+  cursor:none;transition:all 0.25s;
+}
+.chip:hover,.chip.active{
+  border-color:var(--cyan);
+  background:rgba(0,229,255,0.08);
+  color:var(--cyan);
+}
+.submit-btn{
+  width:100%;padding:16px;margin-top:24px;
+  background:var(--cyan);color:#000;
+  font-family:var(--font-display);
+  font-size:1.1rem;letter-spacing:0.2em;
+  border:none;cursor:none;
+  transition:all 0.3s;position:relative;overflow:hidden;
+}
+.submit-btn::before{
+  content:'';position:absolute;
+  top:50%;left:-100%;
+  width:100%;height:200%;
+  background:rgba(255,255,255,0.15);
+  transform:translateY(-50%) skewX(-20deg);
+  transition:left 0.4s;
+}
+.submit-btn:hover::before{left:100%}
+.submit-btn:hover{background:#fff;letter-spacing:0.3em}
+
+/* PAGE 5 — AI SEARCH */
+#page5{}
+.ai-container{
+  display:flex;flex-direction:column;align-items:center;
+  gap:40px;opacity:0;
+}
+.radar-wrap{position:relative;width:260px;height:260px}
+.radar-svg{width:100%;height:100%}
+.radar-sweep{
+  transform-origin:50% 50%;
+  animation:sweep 3s linear infinite;
+}
+@keyframes sweep{to{transform:rotate(360deg)}}
+.radar-ping{
+  animation:ping 3s ease-out infinite;
+  transform-origin:center;
+}
+@keyframes ping{
+  0%{opacity:1;r:4}
+  100%{opacity:0;r:20}
+}
+.ai-status{text-align:center}
+.ai-title{
+  font-family:var(--font-display);
+  font-size:2rem;letter-spacing:0.1em;color:#fff;
+}
+.ai-dots span{
+  display:inline-block;
+  width:4px;height:4px;
+  background:var(--cyan);border-radius:50%;
+  margin:0 3px;
+  animation:blink 1.4s infinite;
+}
+.ai-dots span:nth-child(2){animation-delay:0.2s}
+.ai-dots span:nth-child(3){animation-delay:0.4s}
+@keyframes blink{0%,80%,100%{opacity:0}40%{opacity:1}}
+.ai-log{
+  font-family:var(--font-mono);font-size:0.6rem;
+  color:rgba(0,229,255,0.5);letter-spacing:0.1em;
+  line-height:1.9;text-align:left;
+  width:320px;border-left:1px solid var(--glass-border);
+  padding-left:16px;
+}
+.ai-log-line{
+  opacity:0;animation:logIn 0.3s ease forwards;
+}
+.ai-log-line.ok::before{content:'✓  ';color:#00e676}
+.ai-log-line.scan::before{content:'→  ';color:var(--cyan)}
+@keyframes logIn{to{opacity:1}}
+
+/* PAGE 6 — CONFIRMATION */
+#page6{}
+.confirm-card{
+  width:min(680px,94vw);
+  opacity:0;pointer-events:all;
+}
+.confirm-header{
+  background:var(--cyan);
+  padding:28px 36px;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.confirm-header-title{
+  font-family:var(--font-display);
+  font-size:1.8rem;letter-spacing:0.12em;color:#000;
+}
+.confirm-badge{
+  background:#000;color:var(--cyan);
+  padding:6px 16px;
+  font-family:var(--font-mono);font-size:0.6rem;
+  letter-spacing:0.2em;text-transform:uppercase;
+}
+.confirm-body{
+  background:rgba(6,13,20,0.96);
+  border:1px solid var(--glass-border);
+  border-top:none;
+  padding:36px;
+}
+.confirm-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:28px}
+.cg-block{}
+.cg-label{
+  font-family:var(--font-mono);font-size:0.55rem;
+  letter-spacing:0.3em;color:rgba(255,255,255,0.3);
+  text-transform:uppercase;margin-bottom:6px;
+}
+.cg-value{
+  font-size:0.85rem;color:#fff;font-weight:300;
+  letter-spacing:0.03em;
+}
+.cg-value strong{font-weight:600;color:var(--cyan)}
+.price-breakdown{
+  border-top:1px solid var(--glass-border);
+  padding-top:24px;
+  display:flex;flex-direction:column;gap:10px;
+}
+.price-row{
+  display:flex;justify-content:space-between;align-items:center;
+}
+.price-row-label{
+  font-size:0.75rem;color:rgba(255,255,255,0.4);font-weight:300;
+}
+.price-row-val{
+  font-family:var(--font-mono);font-size:0.8rem;color:#fff;
+}
+.price-total{
+  display:flex;justify-content:space-between;align-items:center;
+  border-top:1px solid var(--glass-border);
+  padding-top:16px;margin-top:6px;
+}
+.price-total-label{
+  font-family:var(--font-display);font-size:1.2rem;
+  letter-spacing:0.1em;color:#fff;
+}
+.price-total-val{
+  font-family:var(--font-display);font-size:2rem;
+  letter-spacing:0.05em;color:var(--cyan);
+}
+.confirm-actions{
+  display:flex;gap:12px;margin-top:28px;
+}
+.btn-primary{
+  flex:1;padding:15px;
+  background:var(--cyan);color:#000;
+  font-family:var(--font-display);
+  font-size:1rem;letter-spacing:0.2em;
+  border:none;cursor:none;transition:all 0.3s;
+}
+.btn-primary:hover{background:#fff}
+.btn-secondary{
+  padding:15px 24px;
+  border:1px solid var(--glass-border);
+  background:transparent;color:rgba(255,255,255,0.5);
+  font-family:var(--font-mono);font-size:0.65rem;
+  letter-spacing:0.15em;cursor:none;transition:all 0.3s;
+}
+.btn-secondary:hover{border-color:var(--cyan);color:var(--cyan)}
+
+/* PROGRESS BAR */
+#progress-bar{
+  position:fixed;top:0;left:0;height:2px;z-index:200;
+  background:linear-gradient(to right,transparent,var(--cyan));
+  width:0%;transition:width 0.1s;
+}
+
+/* PAGE INDICATOR */
+#page-dots{
+  position:fixed;right:36px;top:50%;
+  transform:translateY(-50%);
+  z-index:100;
+  display:flex;flex-direction:column;gap:12px;
+}
+.dot{
+  width:6px;height:6px;
+  border-radius:50%;
+  background:rgba(255,255,255,0.2);
+  transition:all 0.4s;
+  cursor:none;
+}
+.dot.active{
+  background:var(--cyan);
+  box-shadow:0 0 10px var(--cyan);
+  transform:scale(1.4);
+}
+
+/* NOISE OVERLAY */
+#noise{
+  position:fixed;inset:0;z-index:1;
+  pointer-events:none;opacity:0.03;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+}
+
+/* LOADING SCREEN */
+#loader{
+  position:fixed;inset:0;z-index:1000;
+  background:var(--dark);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:24px;
+}
+.loader-logo{
+  font-family:var(--font-display);
+  font-size:4rem;letter-spacing:0.2em;color:#fff;
+}
+.loader-logo span{color:var(--cyan)}
+.loader-bar-wrap{
+  width:240px;height:1px;
+  background:rgba(255,255,255,0.1);
+}
+.loader-bar{
+  height:100%;background:var(--cyan);
+  width:0%;transition:width 0.05s linear;
+}
+.loader-text{
+  font-family:var(--font-mono);font-size:0.6rem;
+  letter-spacing:0.3em;color:rgba(255,255,255,0.3);
+  text-transform:uppercase;
+}
+</style>
 </head>
-
 <body>
 
-  <div id="noise"></div>
-  <div id="progress-bar"></div>
-  <div id="cursor"></div>
-  <div id="cursor-ring"></div>
+<div id="noise"></div>
+<div id="progress-bar"></div>
+<div id="cursor"></div>
+<div id="cursor-ring"></div>
 
-  <div id="loader">
-    <div class="loader-logo">CLEAN<span>RIDE</span></div>
-    <div class="loader-bar-wrap">
-      <div class="loader-bar" id="loader-bar"></div>
+<!-- LOADER -->
+<div id="loader">
+  <div class="loader-logo">CLEAN<span>RIDE</span></div>
+  <div class="loader-bar-wrap"><div class="loader-bar" id="loader-bar"></div></div>
+  <div class="loader-text" id="loader-text">Initializing 3D engine...</div>
+</div>
+
+<!-- CANVAS -->
+<canvas id="three-canvas"></canvas>
+
+<!-- NAV -->
+<nav id="nav">
+  <a href="#" class="nav-logo">CLEAN<span>RIDE</span></a>
+  <ul class="nav-links">
+    <li><a href="#page2-anchor">Services</a></li>
+    <li><a href="#page3-anchor">About</a></li>
+    <li><a href="#page4-anchor">Book Now</a></li>
+  </ul>
+  <button class="nav-cta" onclick="scrollToSection(3)">Get a Quote</button>
+</nav>
+
+<!-- PAGE DOTS -->
+<div id="page-dots">
+  <div class="dot active" onclick="scrollToSection(0)"></div>
+  <div class="dot" onclick="scrollToSection(1)"></div>
+  <div class="dot" onclick="scrollToSection(2)"></div>
+  <div class="dot" onclick="scrollToSection(3)"></div>
+  <div class="dot" onclick="scrollToSection(4)"></div>
+  <div class="dot" onclick="scrollToSection(5)"></div>
+</div>
+
+<!-- SCROLL CONTAINER -->
+<div id="scroll-container">
+
+  <!-- PAGE 1: HERO -->
+  <section class="page-section" id="page-1">
+    <div class="hero-content">
+      <p class="hero-label">Premium Vehicle Detailing — Est. 2024</p>
+      <h1 class="hero-title">
+        CLEAN<br><span class="stroke">RIDE</span>
+      </h1>
+      <p class="hero-sub">
+        Where engineering meets artistry. We restore, protect, and transform your vehicle to its most immaculate state — guaranteed.
+      </p>
+      <div class="hero-stats">
+        <div class="stat-item">
+          <div class="stat-num">500+</div>
+          <div class="stat-label">Expert Shops</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-num">50K</div>
+          <div class="stat-label">Cars Detailed</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-num">4.9★</div>
+          <div class="stat-label">Avg Rating</div>
+        </div>
+      </div>
     </div>
-    <div class="loader-text" id="loader-text">Initializing 3D engine...</div>
-  </div>
+    <div class="scroll-indicator">
+      <div class="scroll-line"></div>
+      <span>Scroll</span>
+    </div>
+  </section>
 
-  <canvas id="three-canvas"></canvas>
+  <!-- PAGE 2: EXPLOSION -->
+  <section class="page-section" id="page-2">
+    <div id="page2-anchor" style="position:absolute;top:-80px"></div>
+    <div class="explosion-label" id="explosion-label">CLEAN RIDE</div>
+    <div class="detail-panel" id="dp1">
+      <div class="dp-tag">01 — Engine Bay</div>
+      <div class="dp-title">DEEP<br>CLEAN</div>
+      <div class="dp-sub">Complete engine degreasing. All components cleaned and conditioned.</div>
+      <div class="dp-value">From ₹3,499</div>
+    </div>
+    <div class="detail-panel" id="dp2">
+      <div class="dp-tag">02 — Exterior</div>
+      <div class="dp-title">CERAMIC<br>COAT</div>
+      <div class="dp-sub">9H hardness nano-coating. 3–5 year protection. Mirror finish.</div>
+      <div class="dp-value">From ₹18,999</div>
+    </div>
+    <div class="detail-panel" id="dp3">
+      <div class="dp-tag">03 — Paint</div>
+      <div class="dp-title">PPF<br>SHIELD</div>
+      <div class="dp-sub">Self-healing Paint Protection Film. Invisible armour against stone chips.</div>
+      <div class="dp-value">From ₹24,999</div>
+    </div>
+    <div class="detail-panel" id="dp4">
+      <div class="dp-tag">04 — Interior</div>
+      <div class="dp-title">NAPPA<br>CARE</div>
+      <div class="dp-sub">Steam cleaning, leather conditioning, UV protection spray.</div>
+      <div class="dp-value">From ₹4,999</div>
+    </div>
+  </section>
 
-  <nav id="nav">
-    <a href="#" class="nav-logo">CLEAN<span>RIDE</span></a>
-    <ul class="nav-links">
-      <li><a href="#page2-anchor">Services</a></li>
-      <li><a href="#page3-anchor">About</a></li>
-      <li><a href="#page4-anchor">Book Now</a></li>
-      <li><a href="#page7-anchor">Bikes</a></li>
-    </ul>
-    <button class="nav-cta" onclick="scrollToSection(3)">Get a Quote</button>
-  </nav>
+  <!-- PAGE 3: MISSION / SERVICES -->
+  <section class="page-section" id="page-3" style="flex-direction:column;gap:0">
+    <div id="page3-anchor" style="position:absolute;top:-80px"></div>
+    <div class="mission-center" id="mission-center">
+      <p class="mission-eyebrow">Our Purpose</p>
+      <h2 class="mission-headline">PROVIDING SERVICES<br><em>TO CUSTOMER</em></h2>
+      <p class="mission-body">We connect you to the finest vehicle care professionals in your city. Every service backed by our quality guarantee and AI-matched to the right specialist.</p>
+    </div>
+    <div class="services-grid" id="services-grid">
+      <div class="service-item">
+        <div class="si-num">01</div>
+        <div class="si-name">EXTERIOR WASH</div>
+        <div class="si-desc">Touchless foam wash, hand dry, tyre dress and glass polish</div>
+        <div class="si-price">₹999 — ₹2,499</div>
+      </div>
+      <div class="service-item">
+        <div class="si-num">02</div>
+        <div class="si-name">FULL DETAIL</div>
+        <div class="si-desc">Paint decon, clay bar, machine polish, interior shampoo</div>
+        <div class="si-price">₹6,999 — ₹14,999</div>
+      </div>
+      <div class="service-item">
+        <div class="si-num">03</div>
+        <div class="si-name">CERAMIC COAT</div>
+        <div class="si-desc">Professional 9H nano ceramic application, 2–5 year warranty</div>
+        <div class="si-price">₹18,999 — ₹45,000</div>
+      </div>
+      <div class="service-item">
+        <div class="si-num">04</div>
+        <div class="si-name">PPF WRAP</div>
+        <div class="si-desc">Full or partial self-healing film, TPU grade, lifetime warranty</div>
+        <div class="si-price">₹24,999 — ₹1,20,000</div>
+      </div>
+      <div class="service-item">
+        <div class="si-num">05</div>
+        <div class="si-name">PAINT CORRECT</div>
+        <div class="si-desc">Multi-stage correction removing swirls, scratches, oxidation</div>
+        <div class="si-price">₹8,999 — ₹22,000</div>
+      </div>
+      <div class="service-item">
+        <div class="si-num">06</div>
+        <div class="si-name">ENGINE CLEAN</div>
+        <div class="si-desc">Degreasing, steam clean, engine bay dress and protect</div>
+        <div class="si-price">₹3,499 — ₹7,999</div>
+      </div>
+    </div>
+  </section>
 
-  <div id="page-dots">
-    <div class="dot active" onclick="scrollToSection(0)"></div>
-    <div class="dot" onclick="scrollToSection(1)"></div>
-    <div class="dot" onclick="scrollToSection(2)"></div>
-    <div class="dot" onclick="scrollToSection(3)"></div>
-    <div class="dot" onclick="scrollToSection(4)"></div>
-    <div class="dot" onclick="scrollToSection(5)"></div>
-    <div class="dot" onclick="scrollToSection(6)"></div>
-    <div class="dot" onclick="scrollToSection(7)"></div>
-  </div>
+  <!-- PAGE 4: BOOKING FORM -->
+  <section class="page-section interactive" id="page-4">
+    <div id="page4-anchor" style="position:absolute;top:-80px"></div>
+    <div class="form-overlay" id="form-overlay">
+      <div class="form-title">BOOK A SERVICE</div>
+      <div class="form-sub">AI-matched to the nearest certified professional</div>
+      <div class="form-divider"></div>
 
-  <div id="scroll-container">
+      <div class="service-chips" id="service-chips">
+        <button class="chip active" data-service="exterior">Exterior Wash</button>
+        <button class="chip" data-service="detail">Full Detail</button>
+        <button class="chip" data-service="ceramic">Ceramic Coat</button>
+        <button class="chip" data-service="ppf">PPF Wrap</button>
+        <button class="chip" data-service="engine">Engine Clean</button>
+      </div>
 
-    <!-- PAGE 1: HERO -->
-    <section class="page-section" id="page-1">
-      <div class="hero-content">
-        <p class="hero-label">Premium Vehicle Detailing — Est. 2024</p>
-        <h1 class="hero-title">
-          CLEAN<br><span class="stroke">RIDE</span>
-        </h1>
-        <p class="hero-sub">
-          Where engineering meets artistry. We restore, protect, and transform your vehicle to its most immaculate state
-          — guaranteed.
-        </p>
-        <div class="hero-stats">
-          <div class="stat-item">
-            <div class="stat-num">500+</div>
-            <div class="stat-label">Expert Shops</div>
-          </div>
-          <div class="stat-item">
-            <div class="stat-num">50K</div>
-            <div class="stat-label">Cars Detailed</div>
-          </div>
-          <div class="stat-item">
-            <div class="stat-num">4.9★</div>
-            <div class="stat-label">Avg Rating</div>
-          </div>
+      <div class="form-row">
+        <div class="field-group">
+          <label class="field-label">Full Name</label>
+          <input type="text" class="field-input" id="f-name" placeholder="Arjun Mehta">
+        </div>
+        <div class="field-group">
+          <label class="field-label">Phone Number</label>
+          <input type="tel" class="field-input" id="f-phone" placeholder="+91 98765 43210">
         </div>
       </div>
-      <div class="scroll-indicator">
-        <div class="scroll-line"></div>
-        <span>Scroll</span>
-      </div>
-    </section>
-
-    <!-- PAGE 2: EXPLOSION — prices updated under ₹500 -->
-    <section class="page-section" id="page-2">
-      <div id="page2-anchor" style="position:absolute;top:-80px"></div>
-      <div class="explosion-label" id="explosion-label">CLEAN RIDE</div>
-      <div class="detail-panel" id="dp1">
-        <div class="dp-tag">01 — Engine Bay</div>
-        <div class="dp-title">DEEP<br>CLEAN</div>
-        <div class="dp-sub">Complete engine degreasing. All components cleaned and conditioned.</div>
-        <div class="dp-value">From ₹149</div>
-      </div>
-      <div class="detail-panel" id="dp2">
-        <div class="dp-tag">02 — Exterior</div>
-        <div class="dp-title">CERAMIC<br>COAT</div>
-        <div class="dp-sub">9H hardness nano-coating. 3–5 year protection. Mirror finish.</div>
-        <div class="dp-value">From ₹299</div>
-      </div>
-      <div class="detail-panel" id="dp3">
-        <div class="dp-tag">03 — Paint</div>
-        <div class="dp-title">PPF<br>SHIELD</div>
-        <div class="dp-sub">Self-healing Paint Protection Film. Invisible armour against stone chips.</div>
-        <div class="dp-value">From ₹349</div>
-      </div>
-      <div class="detail-panel" id="dp4">
-        <div class="dp-tag">04 — Interior</div>
-        <div class="dp-title">NAPPA<br>CARE</div>
-        <div class="dp-sub">Steam cleaning, leather conditioning, UV protection spray.</div>
-        <div class="dp-value">From ₹199</div>
-      </div>
-    </section>
-
-    <!-- PAGE 3: MISSION / SERVICES — prices updated under ₹500 -->
-    <section class="page-section" id="page-3" style="flex-direction:column;gap:0">
-      <div id="page3-anchor" style="position:absolute;top:-80px"></div>
-      <div class="mission-center" id="mission-center">
-        <p class="mission-eyebrow">Our Purpose</p>
-        <h2 class="mission-headline">PROVIDING SERVICES<br><em>TO CUSTOMER</em></h2>
-        <p class="mission-body">We connect you to the finest vehicle care professionals in your city. Every service
-          backed by our quality guarantee and AI-matched to the right specialist.</p>
-      </div>
-      <div class="services-grid" id="services-grid">
-        <div class="service-item">
-          <div class="si-num">01</div>
-          <div class="si-name">EXTERIOR WASH</div>
-          <div class="si-desc">Touchless foam wash, hand dry, tyre dress and glass polish</div>
-          <div class="si-price">₹99 — ₹199</div>
-        </div>
-        <div class="service-item">
-          <div class="si-num">02</div>
-          <div class="si-name">FULL DETAIL</div>
-          <div class="si-desc">Paint decon, clay bar, machine polish, interior shampoo</div>
-          <div class="si-price">₹199 — ₹349</div>
-        </div>
-        <div class="service-item">
-          <div class="si-num">03</div>
-          <div class="si-name">CERAMIC COAT</div>
-          <div class="si-desc">Professional 9H nano ceramic application, 2–5 year warranty</div>
-          <div class="si-price">₹299 — ₹499</div>
-        </div>
-        <div class="service-item">
-          <div class="si-num">04</div>
-          <div class="si-name">PPF WRAP</div>
-          <div class="si-desc">Full or partial self-healing film, TPU grade, lifetime warranty</div>
-          <div class="si-price">₹349 — ₹499</div>
-        </div>
-        <div class="service-item">
-          <div class="si-num">05</div>
-          <div class="si-name">PAINT CORRECT</div>
-          <div class="si-desc">Multi-stage correction removing swirls, scratches, oxidation</div>
-          <div class="si-price">₹199 — ₹449</div>
-        </div>
-        <div class="service-item">
-          <div class="si-num">06</div>
-          <div class="si-name">ENGINE CLEAN</div>
-          <div class="si-desc">Degreasing, steam clean, engine bay dress and protect</div>
-          <div class="si-price">₹149 — ₹299</div>
+      <div class="form-row single">
+        <div class="field-group">
+          <label class="field-label">Pickup Address</label>
+          <input type="text" class="field-input" id="f-address" placeholder="123 Bandra West, Mumbai, Maharashtra">
         </div>
       </div>
-    </section>
-
-    <!-- PAGE 4: BOOKING FORM -->
-    <section class="page-section interactive" id="page-4">
-      <div id="page4-anchor" style="position:absolute;top:-80px"></div>
-      <div class="form-overlay" id="form-overlay">
-        <div class="form-title">BOOK A SERVICE</div>
-        <div class="form-sub">AI-matched to the nearest certified professional</div>
-        <div class="form-divider"></div>
-        <div class="service-chips" id="service-chips">
-          <button class="chip active" data-service="exterior">Exterior Wash</button>
-          <button class="chip" data-service="detail">Full Detail</button>
-          <button class="chip" data-service="ceramic">Ceramic Coat</button>
-          <button class="chip" data-service="ppf">PPF Wrap</button>
-          <button class="chip" data-service="engine">Engine Clean</button>
+      <div class="form-row triple">
+        <div class="field-group">
+          <label class="field-label">Vehicle Make</label>
+          <select class="field-input" id="f-make">
+            <option value="">Select Make</option>
+            <option>Mercedes-Benz</option>
+            <option>BMW</option>
+            <option>Audi</option>
+            <option>Porsche</option>
+            <option>Land Rover</option>
+            <option>Toyota</option>
+            <option>Hyundai</option>
+            <option>Tata</option>
+          </select>
         </div>
-        <div class="form-row">
-          <div class="field-group">
-            <label class="field-label">Full Name</label>
-            <input type="text" class="field-input" id="f-name" placeholder="Arjun Mehta">
-          </div>
-          <div class="field-group">
-            <label class="field-label">Phone Number</label>
-            <input type="tel" class="field-input" id="f-phone" placeholder="+91 98765 43210">
-          </div>
+        <div class="field-group">
+          <label class="field-label">Model</label>
+          <input type="text" class="field-input" id="f-model" placeholder="S-Class 500">
         </div>
-        <div class="form-row single">
-          <div class="field-group">
-            <label class="field-label">Pickup Address</label>
-            <input type="text" class="field-input" id="f-address" placeholder="123 Bandra West, Mumbai, Maharashtra">
-          </div>
-        </div>
-        <div class="form-row triple">
-          <div class="field-group">
-            <label class="field-label">Vehicle Make</label>
-            <select class="field-input" id="f-make">
-              <option value="">Select Make</option>
-              <option>Mercedes-Benz</option>
-              <option>BMW</option>
-              <option>Audi</option>
-              <option>Porsche</option>
-              <option>Land Rover</option>
-              <option>Toyota</option>
-              <option>Hyundai</option>
-              <option>Tata</option>
-            </select>
-          </div>
-          <div class="field-group">
-            <label class="field-label">Model</label>
-            <input type="text" class="field-input" id="f-model" placeholder="S-Class 500">
-          </div>
-          <div class="field-group">
-            <label class="field-label">Year</label>
-            <input type="number" class="field-input" id="f-year" placeholder="2023" min="2000" max="2025">
-          </div>
-        </div>
-        <div class="form-row">
-          <div class="field-group">
-            <label class="field-label">Preferred Date</label>
-            <input type="date" class="field-input" id="f-date">
-          </div>
-          <div class="field-group">
-            <label class="field-label">Preferred Time</label>
-            <select class="field-input" id="f-time">
-              <option value="">Select Slot</option>
-              <option>08:00 AM — 10:00 AM</option>
-              <option>10:00 AM — 12:00 PM</option>
-              <option>12:00 PM — 02:00 PM</option>
-              <option>02:00 PM — 04:00 PM</option>
-              <option>04:00 PM — 06:00 PM</option>
-            </select>
-          </div>
-        </div>
-        <button class="submit-btn" id="submit-btn" onclick="submitBooking()">
-          FIND NEAREST SHOP →
-        </button>
-      </div>
-    </section>
-
-    <!-- PAGE 5: AI SEARCH -->
-    <section class="page-section" id="page-5">
-      <div class="ai-container" id="ai-container">
-        <div class="radar-wrap">
-          <svg class="radar-svg" viewBox="0 0 260 260">
-            <defs>
-              <radialGradient id="rg" cx="50%" cy="50%">
-                <stop offset="0%" stop-color="#00e5ff" stop-opacity="0.15" />
-                <stop offset="100%" stop-color="#00e5ff" stop-opacity="0" />
-              </radialGradient>
-            </defs>
-            <circle cx="130" cy="130" r="120" fill="none" stroke="rgba(0,229,255,0.1)" stroke-width="1" />
-            <circle cx="130" cy="130" r="90" fill="none" stroke="rgba(0,229,255,0.12)" stroke-width="1" />
-            <circle cx="130" cy="130" r="60" fill="none" stroke="rgba(0,229,255,0.15)" stroke-width="1" />
-            <circle cx="130" cy="130" r="30" fill="none" stroke="rgba(0,229,255,0.2)" stroke-width="1" />
-            <line x1="130" y1="10" x2="130" y2="250" stroke="rgba(0,229,255,0.08)" stroke-width="1" />
-            <line x1="10" y1="130" x2="250" y2="130" stroke="rgba(0,229,255,0.08)" stroke-width="1" />
-            <g class="radar-sweep">
-              <path d="M130,130 L130,10 A120,120 0 0,1 248,178 Z" fill="url(#rg)" />
-              <line x1="130" y1="130" x2="130" y2="10" stroke="#00e5ff" stroke-width="1.5" opacity="0.8" />
-            </g>
-            <circle class="radar-ping" cx="165" cy="95" r="4" fill="#00e5ff" style="animation-delay:0.5s" />
-            <circle class="radar-ping" cx="190" cy="155" r="4" fill="#00e5ff" style="animation-delay:1.2s" />
-            <circle class="radar-ping" cx="95" cy="165" r="4" fill="#00e5ff" style="animation-delay:1.8s" />
-            <circle cx="130" cy="130" r="5" fill="#00e5ff" />
-            <circle cx="130" cy="130" r="10" fill="none" stroke="#00e5ff" stroke-width="1" opacity="0.5" />
-          </svg>
-        </div>
-        <div class="ai-status">
-          <div class="ai-title">AI AGENT SEARCHING</div>
-          <div class="ai-dots"><span></span><span></span><span></span></div>
-        </div>
-        <div class="ai-log" id="ai-log"></div>
-      </div>
-    </section>
-
-    <!-- PAGE 6: CONFIRMATION — prices updated under ₹500 -->
-    <section class="page-section interactive" id="page-6">
-      <div class="confirm-card" id="confirm-card">
-        <div class="confirm-header">
-          <div class="confirm-header-title">BOOKING CONFIRMED</div>
-          <div class="confirm-badge">REF #CR-2024-8821</div>
-        </div>
-        <div class="confirm-body">
-          <div class="confirm-grid">
-            <div class="cg-block">
-              <div class="cg-label">Matched Shop</div>
-              <div class="cg-value"><strong>AutoSpa Elite — Bandra</strong></div>
-            </div>
-            <div class="cg-block">
-              <div class="cg-label">Shop Rating</div>
-              <div class="cg-value"><strong>4.9</strong> / 5.0 (312 reviews)</div>
-            </div>
-            <div class="cg-block">
-              <div class="cg-label">Distance</div>
-              <div class="cg-value">2.3 km from pickup</div>
-            </div>
-            <div class="cg-block">
-              <div class="cg-label">Estimated Time</div>
-              <div class="cg-value">2h 30m service duration</div>
-            </div>
-            <div class="cg-block">
-              <div class="cg-label">Service</div>
-              <div class="cg-value" id="conf-service">Exterior Wash</div>
-            </div>
-            <div class="cg-block">
-              <div class="cg-label">Pickup Slot</div>
-              <div class="cg-value" id="conf-slot">10:00 AM — 12:00 PM</div>
-            </div>
-          </div>
-          <div class="price-breakdown">
-            <div class="price-row">
-              <span class="price-row-label">Service Base Price</span>
-              <span class="price-row-val" id="conf-base">₹149</span>
-            </div>
-            <div class="price-row">
-              <span class="price-row-label">Platform Convenience Fee</span>
-              <span class="price-row-val">₹19</span>
-            </div>
-            <div class="price-row">
-              <span class="price-row-label">GST (18%)</span>
-              <span class="price-row-val" id="conf-gst">₹30</span>
-            </div>
-            <div class="price-total">
-              <span class="price-total-label">TOTAL</span>
-              <span class="price-total-val" id="conf-total">₹198</span>
-            </div>
-          </div>
-          <div class="confirm-actions">
-            <button class="btn-primary" onclick="scrollToSection(6)">BOOK BIKE SERVICE →</button>
-            <button class="btn-secondary" onclick="scrollToSection(3)">MODIFY</button>
-          </div>
+        <div class="field-group">
+          <label class="field-label">Year</label>
+          <input type="number" class="field-input" id="f-year" placeholder="2023" min="2000" max="2025">
         </div>
       </div>
-    </section>
-
-    <!-- PAGE 7: BIKE INFO FORM (NEW) -->
-    <section class="page-section interactive" id="page-7">
-      <div id="page7-anchor" style="position:absolute;top:-80px"></div>
-      <div class="bike-form-overlay" id="bike-form-overlay">
-        <div style="display:flex;align-items:center;gap:12px;margin-bottom:6px">
-          <div style="width:3px;height:34px;background:var(--magenta)"></div>
-          <div class="form-title">BIKE SERVICE</div>
+      <div class="form-row">
+        <div class="field-group">
+          <label class="field-label">Preferred Date</label>
+          <input type="date" class="field-input" id="f-date">
         </div>
-        <div class="form-sub">Tell us about your two-wheeler — we'll find the perfect specialist</div>
-        <div class="form-divider-mag"></div>
-
-        <p class="field-label" style="margin-bottom:12px">Select Bike Type</p>
-        <div class="bike-type-grid">
-          <div class="btc active" onclick="selectBikeType(this)">
-            <span class="btc-icon">&#128664;</span>
-            <div class="btc-name">SPORT</div>
-            <div class="btc-sub">CBR, R15, RC</div>
-          </div>
-          <div class="btc" onclick="selectBikeType(this)">
-            <span class="btc-icon">&#128663;</span>
-            <div class="btc-name">CRUISER</div>
-            <div class="btc-sub">Bullet, Classic</div>
-          </div>
-          <div class="btc" onclick="selectBikeType(this)">
-            <span class="btc-icon">&#128756;</span>
-            <div class="btc-name">SCOOTER</div>
-            <div class="btc-sub">Activa, Dio</div>
-          </div>
-          <div class="btc" onclick="selectBikeType(this)">
-            <span class="btc-icon">&#9889;</span>
-            <div class="btc-name">SUPERBIKE</div>
-            <div class="btc-sub">Ninja, MT-15</div>
-          </div>
-          <div class="btc" onclick="selectBikeType(this)">
-            <span class="btc-icon">&#9968;</span>
-            <div class="btc-name">ADVENTURE</div>
-            <div class="btc-sub">Himalayan, GS</div>
-          </div>
-          <div class="btc" onclick="selectBikeType(this)">
-            <span class="btc-icon">&#128267;</span>
-            <div class="btc-name">ELECTRIC</div>
-            <div class="btc-sub">Ola, Ather, TVS</div>
-          </div>
-        </div>
-
-        <p class="field-label" style="margin-bottom:10px;margin-top:4px">Choose Service</p>
-        <div class="service-chips" id="bike-chips">
-          <button class="chip mag active" data-bs="Full Wash">Full Wash</button>
-          <button class="chip mag" data-bs="Polish">Polish</button>
-          <button class="chip mag" data-bs="Ceramic Coat">Ceramic</button>
-          <button class="chip mag" data-bs="Engine Clean">Engine</button>
-          <button class="chip mag" data-bs="Full Detail">Full Detail</button>
-        </div>
-
-        <div class="form-row triple">
-          <div class="field-group">
-            <label class="field-label">Brand</label>
-            <select class="field-input" id="b-brand">
-              <option value="">Select Brand</option>
-              <option>Royal Enfield</option>
-              <option>Honda</option>
-              <option>Yamaha</option>
-              <option>Bajaj</option>
-              <option>TVS</option>
-              <option>KTM</option>
-              <option>Kawasaki</option>
-              <option>Suzuki</option>
-              <option>Hero</option>
-              <option>Ola Electric</option>
-              <option>Ather</option>
-            </select>
-          </div>
-          <div class="field-group">
-            <label class="field-label">Model</label>
-            <input type="text" class="field-input" id="b-model" placeholder="Classic 350">
-          </div>
-          <div class="field-group">
-            <label class="field-label">Year</label>
-            <input type="number" class="field-input" id="b-year" placeholder="2023" min="2000" max="2025">
-          </div>
-        </div>
-        <div class="form-row">
-          <div class="field-group">
-            <label class="field-label">Owner Name</label>
-            <input type="text" class="field-input" id="b-name" placeholder="Priya Sharma">
-          </div>
-          <div class="field-group">
-            <label class="field-label">Phone</label>
-            <input type="tel" class="field-input" id="b-phone" placeholder="+91 99887 76655">
-          </div>
-        </div>
-        <div class="form-row single">
-          <div class="field-group">
-            <label class="field-label">Pickup Address</label>
-            <input type="text" class="field-input" id="b-address" placeholder="42 Koramangala, Bangalore, Karnataka">
-          </div>
-        </div>
-        <div class="form-row">
-          <div class="field-group">
-            <label class="field-label">Preferred Date</label>
-            <input type="date" class="field-input" id="b-date">
-          </div>
-          <div class="field-group">
-            <label class="field-label">Preferred Time</label>
-            <select class="field-input" id="b-time">
-              <option value="">Select Slot</option>
-              <option>08:00 AM — 10:00 AM</option>
-              <option>10:00 AM — 12:00 PM</option>
-              <option>12:00 PM — 02:00 PM</option>
-              <option>02:00 PM — 04:00 PM</option>
-              <option>04:00 PM — 06:00 PM</option>
-            </select>
-          </div>
-        </div>
-        <div class="form-row single">
-          <div class="field-group">
-            <label class="field-label">Special Notes (optional)</label>
-            <input type="text" class="field-input" id="b-notes" placeholder="Scratch near tank, chain needs lubing...">
-          </div>
-        </div>
-        <button class="submit-btn-mag" onclick="submitBike()">FIND BIKE SPECIALIST →</button>
-      </div>
-    </section>
-
-    <!-- PAGE 8: THANK YOU (NEW) -->
-    <section class="page-section interactive" id="page-8">
-      <div class="thankyou-wrap" id="thankyou-wrap">
-        <div class="ty-ring">
-          <div class="ty-check">
-            <svg viewBox="0 0 38 38" fill="none">
-              <path d="M7 19l8 8 16-16" stroke="#00e5ff" stroke-width="2.5" stroke-linecap="round"
-                stroke-linejoin="round" />
-            </svg>
-          </div>
-        </div>
-        <div class="ty-title">THANK<br><span class="ty-stroke">YOU!</span></div>
-        <p class="ty-sub">Your booking is confirmed. Our AI has matched you with the best-rated specialist near you.
-          We'll take care of everything from here.</p>
-        <div class="ty-ref" id="ty-ref">BOOKING REF: #CR-2024-9933</div>
-        <div class="ty-steps">
-          <div class="ty-step">
-            <div class="ty-step-num">01</div>
-            <div class="ty-step-label">Confirmation SMS sent to your number</div>
-          </div>
-          <div class="ty-step">
-            <div class="ty-step-num">02</div>
-            <div class="ty-step-label">Specialist assigned within 30 mins</div>
-          </div>
-          <div class="ty-step">
-            <div class="ty-step-num">03</div>
-            <div class="ty-step-label">Vehicle picked up at your chosen slot</div>
-          </div>
-          <div class="ty-step">
-            <div class="ty-step-num">04</div>
-            <div class="ty-step-label">Delivered back spotless &amp; gleaming</div>
-          </div>
-        </div>
-        <div class="ty-actions">
-          <button class="btn-primary" style="min-width:160px" onclick="scrollToSection(0)">BACK TO HOME</button>
-          <button class="btn-secondary" onclick="scrollToSection(6)">BOOK ANOTHER</button>
+        <div class="field-group">
+          <label class="field-label">Preferred Time</label>
+          <select class="field-input" id="f-time">
+            <option value="">Select Slot</option>
+            <option>08:00 AM — 10:00 AM</option>
+            <option>10:00 AM — 12:00 PM</option>
+            <option>12:00 PM — 02:00 PM</option>
+            <option>02:00 PM — 04:00 PM</option>
+            <option>04:00 PM — 06:00 PM</option>
+          </select>
         </div>
       </div>
-    </section>
+      <button class="submit-btn" id="submit-btn" onclick="submitBooking()">
+        FIND NEAREST SHOP →
+      </button>
+    </div>
+  </section>
 
-  </div>
+  <!-- PAGE 5: AI SEARCH -->
+  <section class="page-section" id="page-5">
+    <div class="ai-container" id="ai-container">
+      <div class="radar-wrap">
+        <svg class="radar-svg" viewBox="0 0 260 260">
+          <defs>
+            <radialGradient id="rg" cx="50%" cy="50%">
+              <stop offset="0%" stop-color="#00e5ff" stop-opacity="0.15"/>
+              <stop offset="100%" stop-color="#00e5ff" stop-opacity="0"/>
+            </radialGradient>
+          </defs>
+          <!-- Rings -->
+          <circle cx="130" cy="130" r="120" fill="none" stroke="rgba(0,229,255,0.1)" stroke-width="1"/>
+          <circle cx="130" cy="130" r="90" fill="none" stroke="rgba(0,229,255,0.12)" stroke-width="1"/>
+          <circle cx="130" cy="130" r="60" fill="none" stroke="rgba(0,229,255,0.15)" stroke-width="1"/>
+          <circle cx="130" cy="130" r="30" fill="none" stroke="rgba(0,229,255,0.2)" stroke-width="1"/>
+          <!-- Cross hairs -->
+          <line x1="130" y1="10" x2="130" y2="250" stroke="rgba(0,229,255,0.08)" stroke-width="1"/>
+          <line x1="10" y1="130" x2="250" y2="130" stroke="rgba(0,229,255,0.08)" stroke-width="1"/>
+          <!-- Sweep -->
+          <g class="radar-sweep">
+            <path d="M130,130 L130,10 A120,120 0 0,1 248,178 Z" fill="url(#rg)"/>
+            <line x1="130" y1="130" x2="130" y2="10" stroke="#00e5ff" stroke-width="1.5" opacity="0.8"/>
+          </g>
+          <!-- Pings -->
+          <circle class="radar-ping" cx="165" cy="95" r="4" fill="#00e5ff" style="animation-delay:0.5s"/>
+          <circle class="radar-ping" cx="190" cy="155" r="4" fill="#00e5ff" style="animation-delay:1.2s"/>
+          <circle class="radar-ping" cx="95" cy="165" r="4" fill="#00e5ff" style="animation-delay:1.8s"/>
+          <!-- Center dot -->
+          <circle cx="130" cy="130" r="5" fill="#00e5ff"/>
+          <circle cx="130" cy="130" r="10" fill="none" stroke="#00e5ff" stroke-width="1" opacity="0.5"/>
+        </svg>
+      </div>
+      <div class="ai-status">
+        <div class="ai-title">AI AGENT SEARCHING</div>
+        <div class="ai-dots"><span></span><span></span><span></span></div>
+      </div>
+      <div class="ai-log" id="ai-log"></div>
+    </div>
+  </section>
 
-  <script>
-    gsap.registerPlugin(ScrollTrigger);
+  <!-- PAGE 6: CONFIRMATION -->
+  <section class="page-section interactive" id="page-6">
+    <div class="confirm-card" id="confirm-card">
+      <div class="confirm-header">
+        <div class="confirm-header-title">BOOKING CONFIRMED</div>
+        <div class="confirm-badge">REF #CR-2024-8821</div>
+      </div>
+      <div class="confirm-body">
+        <div class="confirm-grid">
+          <div class="cg-block">
+            <div class="cg-label">Matched Shop</div>
+            <div class="cg-value"><strong>AutoSpa Elite — Bandra</strong></div>
+          </div>
+          <div class="cg-block">
+            <div class="cg-label">Shop Rating</div>
+            <div class="cg-value"><strong>4.9</strong> / 5.0 (312 reviews)</div>
+          </div>
+          <div class="cg-block">
+            <div class="cg-label">Distance</div>
+            <div class="cg-value">2.3 km from pickup</div>
+          </div>
+          <div class="cg-block">
+            <div class="cg-label">Estimated Time</div>
+            <div class="cg-value">2h 30m service duration</div>
+          </div>
+          <div class="cg-block">
+            <div class="cg-label">Service</div>
+            <div class="cg-value" id="conf-service">Exterior Wash</div>
+          </div>
+          <div class="cg-block">
+            <div class="cg-label">Pickup Slot</div>
+            <div class="cg-value" id="conf-slot">10:00 AM — 12:00 PM</div>
+          </div>
+        </div>
+        <div class="price-breakdown">
+          <div class="price-row">
+            <span class="price-row-label">Service Base Price</span>
+            <span class="price-row-val" id="conf-base">₹1,999</span>
+          </div>
+          <div class="price-row">
+            <span class="price-row-label">Platform Convenience Fee</span>
+            <span class="price-row-val">₹199</span>
+          </div>
+          <div class="price-row">
+            <span class="price-row-label">GST (18%)</span>
+            <span class="price-row-val" id="conf-gst">₹387</span>
+          </div>
+          <div class="price-total">
+            <span class="price-total-label">TOTAL</span>
+            <span class="price-total-val" id="conf-total">₹2,585</span>
+          </div>
+        </div>
+        <div class="confirm-actions">
+          <button class="btn-primary">CONFIRM & PAY →</button>
+          <button class="btn-secondary" onclick="scrollToSection(3)">MODIFY</button>
+        </div>
+      </div>
+    </div>
+  </section>
 
-    const cur = document.getElementById('cursor');
-    const ring = document.getElementById('cursor-ring');
-    let mx = 0, my = 0, rx = 0, ry = 0;
-    document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; gsap.set(cur, { x: mx, y: my }) });
-    (function animRing() { requestAnimationFrame(animRing); rx += (mx - rx) * 0.12; ry += (my - ry) * 0.12; gsap.set(ring, { x: rx, y: ry }) })();
+</div><!-- end scroll-container -->
 
-    const canvas = document.getElementById('three-canvas');
-    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false });
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.shadowMap.enabled = true;
-    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-    renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 0.8;
+<script>
+gsap.registerPlugin(ScrollTrigger);
 
-    const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x020408);
-    scene.fog = new THREE.FogExp2(0x020408, 0.025);
+/* ─── CURSOR ─── */
+const cur=document.getElementById('cursor');
+const ring=document.getElementById('cursor-ring');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;gsap.set(cur,{x:mx,y:my})});
+(function animRing(){requestAnimationFrame(animRing);rx+=(mx-rx)*0.12;ry+=(my-ry)*0.12;gsap.set(ring,{x:rx,y:ry})})();
 
-    const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 200);
-    camera.position.set(0, 2, 10);
-    camera.lookAt(0, 0, 0);
+/* ─── THREE.JS 3D SCENE ─── */
+const canvas=document.getElementById('three-canvas');
+const renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:false});
+renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
+renderer.setSize(window.innerWidth,window.innerHeight);
+renderer.shadowMap.enabled=true;
+renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+renderer.toneMapping=THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure=0.8;
 
-    window.addEventListener('resize', () => {
-      camera.aspect = window.innerWidth / window.innerHeight;
-      camera.updateProjectionMatrix();
-      renderer.setSize(window.innerWidth, window.innerHeight);
+const scene=new THREE.Scene();
+scene.background=new THREE.Color(0x020408);
+scene.fog=new THREE.FogExp2(0x020408,0.025);
+
+const camera=new THREE.PerspectiveCamera(50,window.innerWidth/window.innerHeight,0.1,200);
+camera.position.set(0,2,10);
+camera.lookAt(0,0,0);
+
+/* ─── RESIZE ─── */
+window.addEventListener('resize',()=>{
+  camera.aspect=window.innerWidth/window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth,window.innerHeight);
+});
+
+/* ─── STUDIO FLOOR ─── */
+const floorGeo=new THREE.PlaneGeometry(60,60,40,40);
+const floorMat=new THREE.MeshStandardMaterial({
+  color:0x050a10,metalness:0.9,roughness:0.3,
+});
+const floor=new THREE.Mesh(floorGeo,floorMat);
+floor.rotation.x=-Math.PI/2;
+floor.position.y=-1.5;
+floor.receiveShadow=true;
+scene.add(floor);
+
+/* ─── GRID ON FLOOR ─── */
+const grid=new THREE.GridHelper(60,60,0x003344,0x001a22);
+grid.position.y=-1.48;
+grid.material.opacity=0.4;
+grid.material.transparent=true;
+scene.add(grid);
+
+/* ─── AMBIENT ─── */
+const ambLight=new THREE.AmbientLight(0x020810,1);
+scene.add(ambLight);
+
+/* ─── KEY LIGHT ─── */
+const keyLight=new THREE.SpotLight(0xffffff,3,40,Math.PI/5,0.4,1);
+keyLight.position.set(8,14,6);
+keyLight.castShadow=true;
+keyLight.shadow.mapSize.width=2048;
+keyLight.shadow.mapSize.height=2048;
+scene.add(keyLight);
+scene.add(keyLight.target);
+
+/* ─── FILL LIGHTS ─── */
+const fillL=new THREE.PointLight(0x004499,1.5,30);
+fillL.position.set(-8,6,-4);
+scene.add(fillL);
+const rimL=new THREE.SpotLight(0x00e5ff,2,20,Math.PI/4,0.8,1);
+rimL.position.set(0,6,-10);
+scene.add(rimL);
+const bottomL=new THREE.PointLight(0x002244,1,8);
+bottomL.position.set(0,-1,0);
+scene.add(bottomL);
+
+/* ─── EXPLODED TARGET POSITIONS (kept as stubs so updateExplode refs don't break) ─── */
+const carGroup=new THREE.Group();scene.add(carGroup);
+const carBody={children:[]};
+const w1=new THREE.Group(),w2=new THREE.Group(),w3=new THREE.Group(),w4=new THREE.Group();
+const chassisMesh={material:{opacity:0},position:{set:()=>{},y:0}};
+const engineBlock={position:{set:()=>{},x:0,y:0,z:0},rotation:{y:0},traverse:()=>{}};
+const interiorGroup={position:{set:()=>{},x:0,y:0,z:0},rotation:{y:0},traverse:()=>{}};
+const targets={chassis:{x:0,y:3.5,z:0},engine:{x:-3.5,y:2,z:1.5},interior:{x:2.5,y:2.5,z:-1.5}};
+
+/* ─── NEON TEXT PARTICLES ─── */
+// Floating particles around the exploded car
+const particleGeo=new THREE.BufferGeometry();
+const pCount=800;
+const pPositions=new Float32Array(pCount*3);
+for(let i=0;i<pCount;i++){
+  pPositions[i*3]=(Math.random()-0.5)*20;
+  pPositions[i*3+1]=(Math.random()-0.5)*15;
+  pPositions[i*3+2]=(Math.random()-0.5)*20;
+}
+particleGeo.setAttribute('position',new THREE.BufferAttribute(pPositions,3));
+const particleMat=new THREE.PointsMaterial({
+  color:0x00e5ff,size:0.04,transparent:true,opacity:0.6,
+  blending:THREE.AdditiveBlending,sizeAttenuation:true
+});
+const particles=new THREE.Points(particleGeo,particleMat);
+scene.add(particles);
+
+/* ─── LIGHT SHAFTS ─── */
+function addLightShaft(x,y,z,color){
+  const sg=new THREE.ConeGeometry(1.5,8,8,1,true);
+  const sm=new THREE.MeshBasicMaterial({color,transparent:true,opacity:0.04,side:THREE.DoubleSide,depthWrite:false});
+  const shaft=new THREE.Mesh(sg,sm);
+  shaft.position.set(x,y+4,z);
+  shaft.rotation.x=Math.PI;
+  scene.add(shaft);
+}
+addLightShaft(6,6,2,0xffffff);
+addLightShaft(-5,6,-3,0x004499);
+addLightShaft(0,8,-6,0x00e5ff);
+
+/* ─── CAMERA STATE ─── */
+const camState={
+  pos:new THREE.Vector3(0,2,10),
+  target:new THREE.Vector3(0,0,0),
+  tPos:new THREE.Vector3(0,2,10),
+  tTarget:new THREE.Vector3(0,0,0)
+};
+
+/* ─── SCROLL STATE ─── */
+let scrollPct=0;
+let currentPage=0;
+const totalPages=6;
+
+function onScroll(){
+  const max=document.body.scrollHeight-window.innerHeight;
+  scrollPct=window.scrollY/max;
+  document.getElementById('progress-bar').style.width=(scrollPct*100)+'%';
+  const pg=Math.min(Math.floor(scrollPct*totalPages),totalPages-1);
+  if(pg!==currentPage){currentPage=pg;updatePageUI(pg)}
+  updateCamera(scrollPct);
+  updateExplode(scrollPct);
+}
+window.addEventListener('scroll',onScroll,{passive:true});
+
+function updateCamera(t){
+  const p=t*totalPages;
+  if(p<1){// Page 1: orbit
+    const angle=p*Math.PI*2;
+    camState.tPos.set(Math.sin(angle)*10,2+p,Math.cos(angle)*10);
+    camState.tTarget.set(0,0.5,0);
+  } else if(p<2){// Page 2: pull back for explosion
+    const k=(p-1);
+    camState.tPos.set(10+k*4,3+k*2,12+k*2);
+    camState.tTarget.set(0,1.5,0);
+  } else if(p<3){// Page 3: descend
+    const k=(p-2);
+    camState.tPos.set(12,5-k*8,14);
+    camState.tTarget.set(0,3-k*5,0);
+  } else if(p<4){// Page 4: lock
+    camState.tPos.set(8,0,12);
+    camState.tTarget.set(0,0,0);
+  } else if(p<5){// Page 5: subtle zoom
+    const k=(p-4);
+    camState.tPos.set(8-k*2,0,12-k*2);
+    camState.tTarget.set(0,0,0);
+  } else {// Page 6
+    camState.tPos.set(6,1,10);
+    camState.tTarget.set(0,0.5,0);
+  }
+}
+
+function updateExplode(t){
+  // Car removed — background is pure environment only
+}
+
+function updatePageUI(pg){
+  document.querySelectorAll('.dot').forEach((d,i)=>d.classList.toggle('active',i===pg));
+}
+
+/* ─── RENDER LOOP ─── */
+let time=0;
+function animate(){
+  requestAnimationFrame(animate);
+  time+=0.01;
+
+  // Camera lerp
+  camState.pos.lerp(camState.tPos,0.04);
+  camera.position.copy(camState.pos);
+  const lookTarget=new THREE.Vector3();
+  lookTarget.copy(camState.tTarget);
+  camera.lookAt(lookTarget);
+
+  // Particle drift
+  particles.rotation.y+=0.0005;
+  const pa=particles.geometry.attributes.position.array;
+  for(let i=1;i<pCount*3;i+=3)pa[i]+=Math.sin(time+i)*0.0005;
+  particles.geometry.attributes.position.needsUpdate=true;
+
+  // Rim light animate
+  rimL.intensity=1.5+Math.sin(time*1.5)*0.5;
+  fillL.intensity=1+Math.cos(time*0.8)*0.3;
+
+  renderer.render(scene,camera);
+}
+animate();
+
+/* ─── GSAP SCROLL ANIMATIONS (UI Overlays) ─── */
+function initGSAP(){
+  // Page 1 entrance
+  gsap.to('.hero-label',{opacity:1,y:0,duration:1,delay:0.2,ease:'expo.out'});
+  gsap.to('.hero-title',{opacity:1,y:0,duration:1.2,delay:0.4,ease:'expo.out'});
+  gsap.to('.hero-sub',{opacity:1,y:0,duration:0.9,delay:0.7,ease:'power3.out'});
+  gsap.to('.hero-stats',{opacity:1,y:0,duration:0.8,delay:1,ease:'power3.out'});
+  gsap.to('.scroll-indicator',{opacity:1,duration:1,delay:1.5});
+
+  // Page 2: explosion label
+  ScrollTrigger.create({
+    trigger:'#page-2',start:'top center',end:'bottom center',
+    onEnter:()=>gsap.to('#explosion-label',{opacity:0.15,duration:1.2,ease:'power3.out'}),
+    onLeave:()=>gsap.to('#explosion-label',{opacity:0,duration:0.5}),
+    onEnterBack:()=>gsap.to('#explosion-label',{opacity:0.15,duration:0.8}),
+    onLeaveBack:()=>gsap.to('#explosion-label',{opacity:0,duration:0.5}),
+  });
+  // Detail panels
+  ['#dp1','#dp2','#dp3','#dp4'].forEach((sel,i)=>{
+    ScrollTrigger.create({
+      trigger:'#page-2',start:'top center',end:'bottom center',
+      onEnter:()=>gsap.to(sel,{opacity:1,y:0,duration:0.7,delay:i*0.12,ease:'power3.out'}),
+      onLeave:()=>gsap.to(sel,{opacity:0,duration:0.3}),
+      onEnterBack:()=>gsap.to(sel,{opacity:1,duration:0.5}),
+      onLeaveBack:()=>gsap.to(sel,{opacity:0,duration:0.3}),
     });
+    // Init position
+    gsap.set(sel,{y:30});
+  });
 
-    const floorGeo = new THREE.PlaneGeometry(60, 60, 40, 40);
-    const floorMat = new THREE.MeshStandardMaterial({ color: 0x050a10, metalness: 0.9, roughness: 0.3 });
-    const floor = new THREE.Mesh(floorGeo, floorMat);
-    floor.rotation.x = -Math.PI / 2;
-    floor.position.y = -1.5;
-    floor.receiveShadow = true;
-    scene.add(floor);
+  // Page 3: mission
+  ScrollTrigger.create({
+    trigger:'#page-3',start:'top center',end:'bottom center',
+    onEnter:()=>{
+      gsap.to('#mission-center',{opacity:1,y:0,duration:1,ease:'power3.out'});
+      gsap.to('#services-grid',{opacity:1,y:0,duration:1,delay:0.3,ease:'power3.out'});
+    },
+    onLeave:()=>{
+      gsap.to('#mission-center',{opacity:0,duration:0.4});
+      gsap.to('#services-grid',{opacity:0,duration:0.4});
+    },
+    onEnterBack:()=>{
+      gsap.to('#mission-center',{opacity:1,duration:0.6});
+      gsap.to('#services-grid',{opacity:1,duration:0.6});
+    },
+    onLeaveBack:()=>{
+      gsap.to('#mission-center',{opacity:0,duration:0.4});
+      gsap.to('#services-grid',{opacity:0,duration:0.4});
+    },
+  });
+  gsap.set(['#mission-center','#services-grid'],{y:40});
 
-    const grid = new THREE.GridHelper(60, 60, 0x003344, 0x001a22);
-    grid.position.y = -1.48;
-    grid.material.opacity = 0.4;
-    grid.material.transparent = true;
-    scene.add(grid);
+  // Page 4: form
+  ScrollTrigger.create({
+    trigger:'#page-4',start:'top center',end:'bottom center',
+    onEnter:()=>gsap.to('#form-overlay',{opacity:1,y:0,duration:0.8,ease:'power3.out'}),
+    onLeave:()=>gsap.to('#form-overlay',{opacity:0,y:-20,duration:0.4}),
+    onEnterBack:()=>gsap.to('#form-overlay',{opacity:1,y:0,duration:0.6}),
+    onLeaveBack:()=>gsap.to('#form-overlay',{opacity:0,y:20,duration:0.4}),
+  });
+  gsap.set('#form-overlay',{y:50});
 
-    const ambLight = new THREE.AmbientLight(0x020810, 1);
-    scene.add(ambLight);
+  // Page 5: AI
+  ScrollTrigger.create({
+    trigger:'#page-5',start:'top center',end:'bottom center',
+    onEnter:()=>{
+      gsap.to('#ai-container',{opacity:1,duration:0.8,ease:'power3.out'});
+      runAILog();
+    },
+    onLeave:()=>gsap.to('#ai-container',{opacity:0,duration:0.4}),
+    onEnterBack:()=>gsap.to('#ai-container',{opacity:1,duration:0.6}),
+    onLeaveBack:()=>gsap.to('#ai-container',{opacity:0,duration:0.4}),
+  });
 
-    const keyLight = new THREE.SpotLight(0xffffff, 3, 40, Math.PI / 5, 0.4, 1);
-    keyLight.position.set(8, 14, 6);
-    keyLight.castShadow = true;
-    keyLight.shadow.mapSize.width = 2048;
-    keyLight.shadow.mapSize.height = 2048;
-    scene.add(keyLight);
-    scene.add(keyLight.target);
+  // Page 6: confirm
+  ScrollTrigger.create({
+    trigger:'#page-6',start:'top center',end:'bottom center',
+    onEnter:()=>gsap.to('#confirm-card',{opacity:1,y:0,duration:0.9,ease:'power3.out'}),
+    onLeave:()=>gsap.to('#confirm-card',{opacity:0,duration:0.4}),
+    onEnterBack:()=>gsap.to('#confirm-card',{opacity:1,duration:0.6}),
+    onLeaveBack:()=>gsap.to('#confirm-card',{opacity:0,duration:0.4}),
+  });
+  gsap.set('#confirm-card',{y:50});
+}
 
-    const fillL = new THREE.PointLight(0x004499, 1.5, 30);
-    fillL.position.set(-8, 6, -4);
-    scene.add(fillL);
-    const rimL = new THREE.SpotLight(0x00e5ff, 2, 20, Math.PI / 4, 0.8, 1);
-    rimL.position.set(0, 6, -10);
-    scene.add(rimL);
-    const bottomL = new THREE.PointLight(0x002244, 1, 8);
-    bottomL.position.set(0, -1, 0);
-    scene.add(bottomL);
-
-    const particleGeo = new THREE.BufferGeometry();
-    const pCount = 800;
-    const pPositions = new Float32Array(pCount * 3);
-    for (let i = 0; i < pCount; i++) {
-      pPositions[i * 3] = (Math.random() - 0.5) * 20;
-      pPositions[i * 3 + 1] = (Math.random() - 0.5) * 15;
-      pPositions[i * 3 + 2] = (Math.random() - 0.5) * 20;
-    }
-    particleGeo.setAttribute('position', new THREE.BufferAttribute(pPositions, 3));
-    const particleMat = new THREE.PointsMaterial({
-      color: 0x00e5ff, size: 0.04, transparent: true, opacity: 0.6,
-      blending: THREE.AdditiveBlending, sizeAttenuation: true
-    });
-    const particles = new THREE.Points(particleGeo, particleMat);
-    scene.add(particles);
-
-    function addLightShaft(x, y, z, color) {
-      const sg = new THREE.ConeGeometry(1.5, 8, 8, 1, true);
-      const sm = new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 0.04, side: THREE.DoubleSide, depthWrite: false });
-      const shaft = new THREE.Mesh(sg, sm);
-      shaft.position.set(x, y + 4, z);
-      shaft.rotation.x = Math.PI;
-      scene.add(shaft);
-    }
-    addLightShaft(6, 6, 2, 0xffffff);
-    addLightShaft(-5, 6, -3, 0x004499);
-    addLightShaft(0, 8, -6, 0x00e5ff);
-
-    const camState = {
-      pos: new THREE.Vector3(0, 2, 10),
-      target: new THREE.Vector3(0, 0, 0),
-      tPos: new THREE.Vector3(0, 2, 10),
-      tTarget: new THREE.Vector3(0, 0, 0)
-    };
-
-    let scrollPct = 0;
-    let currentPage = 0;
-    const totalPages = 8;
-
-    function onScroll() {
-      const max = document.body.scrollHeight - window.innerHeight;
-      scrollPct = window.scrollY / max;
-      document.getElementById('progress-bar').style.width = (scrollPct * 100) + '%';
-      const pg = Math.min(Math.floor(scrollPct * totalPages), totalPages - 1);
-      if (pg !== currentPage) { currentPage = pg; updatePageUI(pg) }
-      updateCamera(scrollPct);
-    }
-    window.addEventListener('scroll', onScroll, { passive: true });
-
-    function updateCamera(t) {
-      const p = t * totalPages;
-      if (p < 1) {
-        const angle = p * Math.PI * 2;
-        camState.tPos.set(Math.sin(angle) * 10, 2 + p, Math.cos(angle) * 10);
-        camState.tTarget.set(0, 0.5, 0);
-      } else if (p < 2) {
-        const k = (p - 1);
-        camState.tPos.set(10 + k * 4, 3 + k * 2, 12 + k * 2);
-        camState.tTarget.set(0, 1.5, 0);
-      } else if (p < 3) {
-        const k = (p - 2);
-        camState.tPos.set(12, 5 - k * 8, 14);
-        camState.tTarget.set(0, 3 - k * 5, 0);
-      } else if (p < 6) {
-        camState.tPos.set(8, 0, 12);
-        camState.tTarget.set(0, 0, 0);
-      } else if (p < 7) {
-        const k = (p - 6);
-        camState.tPos.set(8 - k * 3, k * 2, 12 - k * 3);
-        camState.tTarget.set(0, 0, 0);
-      } else {
-        camState.tPos.set(5, 2, 9);
-        camState.tTarget.set(0, 1, 0);
+/* ─── AI LOG ANIMATION ─── */
+const logLines=[
+  {text:'Scanning 500+ registered shops...',cls:'scan'},
+  {text:'GPS signal acquired: Mumbai, MH',cls:'scan'},
+  {text:'Filtering by service: Exterior Wash',cls:'scan'},
+  {text:'Loading shop ratings database...',cls:'scan'},
+  {text:'AutoSpa Elite — 2.3 km — Rating 4.9',cls:'ok'},
+  {text:'ShineZone Pro — 3.8 km — Rating 4.7',cls:'ok'},
+  {text:'LuxCare Bandra — 4.2 km — Rating 4.6',cls:'ok'},
+  {text:'Best match: AutoSpa Elite Bandra',cls:'ok'},
+  {text:'Booking slot confirmed & reserved',cls:'ok'},
+];
+function runAILog(){
+  const log=document.getElementById('ai-log');
+  log.innerHTML='';
+  logLines.forEach((l,i)=>{
+    setTimeout(()=>{
+      const el=document.createElement('div');
+      el.className='ai-log-line '+l.cls;
+      el.textContent=l.text;
+      el.style.animationDelay='0s';
+      log.appendChild(el);
+      if(i===logLines.length-1){
+        setTimeout(()=>scrollToSection(5),2000);
       }
+    },i*400);
+  });
+}
+
+/* ─── SERVICE CHIPS ─── */
+document.querySelectorAll('.chip').forEach(c=>{
+  c.addEventListener('click',()=>{
+    document.querySelectorAll('.chip').forEach(x=>x.classList.remove('active'));
+    c.classList.add('active');
+  });
+});
+
+/* ─── FORM SUBMIT ─── */
+function submitBooking(){
+  const name=document.getElementById('f-name').value;
+  const service=document.querySelector('.chip.active')?.dataset.service||'exterior';
+  const slot=document.getElementById('f-time').value;
+  if(!name){
+    gsap.to('#form-overlay',{x:-8,duration:0.07,repeat:5,yoyo:true,onComplete:()=>gsap.set('#form-overlay',{x:0})});
+    return;
+  }
+  document.getElementById('conf-service').textContent=document.querySelector('.chip.active')?.textContent||'Exterior Wash';
+  document.getElementById('conf-slot').textContent=slot||'10:00 AM — 12:00 PM';
+  scrollToSection(4);
+}
+
+/* ─── SCROLL TO SECTION ─── */
+function scrollToSection(idx){
+  const max=document.body.scrollHeight-window.innerHeight;
+  const target=(idx/totalPages)*max+10;
+  window.scrollTo({top:target,behavior:'smooth'});
+}
+
+/* ─── LOADER ─── */
+function runLoader(){
+  const bar=document.getElementById('loader-bar');
+  const txt=document.getElementById('loader-text');
+  const msgs=['Initializing 3D engine...','Loading studio environment...','Building vehicle geometry...','Calibrating lighting system...','Ready.'];
+  let pct=0,mi=0;
+  const iv=setInterval(()=>{
+    pct+=Math.random()*18+5;
+    if(pct>100)pct=100;
+    bar.style.width=pct+'%';
+    const ni=Math.floor(pct/25);
+    if(ni!==mi&&ni<msgs.length){mi=ni;txt.textContent=msgs[ni];}
+    if(pct>=100){
+      clearInterval(iv);
+      setTimeout(()=>{
+        gsap.to('#loader',{opacity:0,duration:0.8,onComplete:()=>{
+          document.getElementById('loader').style.display='none';
+          initGSAP();
+        }});
+      },400);
     }
+  },120);
+}
 
-    function updatePageUI(pg) {
-      document.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('active', i === pg));
-    }
+window.addEventListener('load',runLoader);
 
-    let time = 0;
-    function animate() {
-      requestAnimationFrame(animate);
-      time += 0.01;
-      camState.pos.lerp(camState.tPos, 0.04);
-      camera.position.copy(camState.pos);
-      const lookTarget = new THREE.Vector3();
-      lookTarget.copy(camState.tTarget);
-      camera.lookAt(lookTarget);
-      particles.rotation.y += 0.0005;
-      const pa = particles.geometry.attributes.position.array;
-      for (let i = 1; i < pCount * 3; i += 3)pa[i] += Math.sin(time + i) * 0.0005;
-      particles.geometry.attributes.position.needsUpdate = true;
-      rimL.intensity = 1.5 + Math.sin(time * 1.5) * 0.5;
-      fillL.intensity = 1 + Math.cos(time * 0.8) * 0.3;
-      renderer.render(scene, camera);
-    }
-    animate();
-
-    function initGSAP() {
-      gsap.to('.hero-label', { opacity: 1, y: 0, duration: 1, delay: 0.2, ease: 'expo.out' });
-      gsap.to('.hero-title', { opacity: 1, y: 0, duration: 1.2, delay: 0.4, ease: 'expo.out' });
-      gsap.to('.hero-sub', { opacity: 1, y: 0, duration: 0.9, delay: 0.7, ease: 'power3.out' });
-      gsap.to('.hero-stats', { opacity: 1, y: 0, duration: 0.8, delay: 1, ease: 'power3.out' });
-      gsap.to('.scroll-indicator', { opacity: 1, duration: 1, delay: 1.5 });
-
-      ScrollTrigger.create({
-        trigger: '#page-2', start: 'top center', end: 'bottom center',
-        onEnter: () => gsap.to('#explosion-label', { opacity: 0.15, duration: 1.2, ease: 'power3.out' }),
-        onLeave: () => gsap.to('#explosion-label', { opacity: 0, duration: 0.5 }),
-        onEnterBack: () => gsap.to('#explosion-label', { opacity: 0.15, duration: 0.8 }),
-        onLeaveBack: () => gsap.to('#explosion-label', { opacity: 0, duration: 0.5 }),
-      });
-      ['#dp1', '#dp2', '#dp3', '#dp4'].forEach((sel, i) => {
-        ScrollTrigger.create({
-          trigger: '#page-2', start: 'top center', end: 'bottom center',
-          onEnter: () => gsap.to(sel, { opacity: 1, y: 0, duration: 0.7, delay: i * 0.12, ease: 'power3.out' }),
-          onLeave: () => gsap.to(sel, { opacity: 0, duration: 0.3 }),
-          onEnterBack: () => gsap.to(sel, { opacity: 1, duration: 0.5 }),
-          onLeaveBack: () => gsap.to(sel, { opacity: 0, duration: 0.3 }),
-        });
-        gsap.set(sel, { y: 30 });
-      });
-
-      ScrollTrigger.create({
-        trigger: '#page-3', start: 'top center', end: 'bottom center',
-        onEnter: () => {
-          gsap.to('#mission-center', { opacity: 1, y: 0, duration: 1, ease: 'power3.out' });
-          gsap.to('#services-grid', { opacity: 1, y: 0, duration: 1, delay: 0.3, ease: 'power3.out' });
-        },
-        onLeave: () => {
-          gsap.to('#mission-center', { opacity: 0, duration: 0.4 });
-          gsap.to('#services-grid', { opacity: 0, duration: 0.4 });
-        },
-        onEnterBack: () => {
-          gsap.to('#mission-center', { opacity: 1, duration: 0.6 });
-          gsap.to('#services-grid', { opacity: 1, duration: 0.6 });
-        },
-        onLeaveBack: () => {
-          gsap.to('#mission-center', { opacity: 0, duration: 0.4 });
-          gsap.to('#services-grid', { opacity: 0, duration: 0.4 });
-        },
-      });
-      gsap.set(['#mission-center', '#services-grid'], { y: 40 });
-
-      ScrollTrigger.create({
-        trigger: '#page-4', start: 'top center', end: 'bottom center',
-        onEnter: () => gsap.to('#form-overlay', { opacity: 1, y: 0, duration: 0.8, ease: 'power3.out' }),
-        onLeave: () => gsap.to('#form-overlay', { opacity: 0, y: -20, duration: 0.4 }),
-        onEnterBack: () => gsap.to('#form-overlay', { opacity: 1, y: 0, duration: 0.6 }),
-        onLeaveBack: () => gsap.to('#form-overlay', { opacity: 0, y: 20, duration: 0.4 }),
-      });
-      gsap.set('#form-overlay', { y: 50 });
-
-      ScrollTrigger.create({
-        trigger: '#page-5', start: 'top center', end: 'bottom center',
-        onEnter: () => {
-          gsap.to('#ai-container', { opacity: 1, duration: 0.8, ease: 'power3.out' });
-          runAILog();
-        },
-        onLeave: () => gsap.to('#ai-container', { opacity: 0, duration: 0.4 }),
-        onEnterBack: () => gsap.to('#ai-container', { opacity: 1, duration: 0.6 }),
-        onLeaveBack: () => gsap.to('#ai-container', { opacity: 0, duration: 0.4 }),
-      });
-
-      ScrollTrigger.create({
-        trigger: '#page-6', start: 'top center', end: 'bottom center',
-        onEnter: () => gsap.to('#confirm-card', { opacity: 1, y: 0, duration: 0.9, ease: 'power3.out' }),
-        onLeave: () => gsap.to('#confirm-card', { opacity: 0, duration: 0.4 }),
-        onEnterBack: () => gsap.to('#confirm-card', { opacity: 1, duration: 0.6 }),
-        onLeaveBack: () => gsap.to('#confirm-card', { opacity: 0, duration: 0.4 }),
-      });
-      gsap.set('#confirm-card', { y: 50 });
-
-      // PAGE 7: bike form
-      ScrollTrigger.create({
-        trigger: '#page-7', start: 'top center', end: 'bottom center',
-        onEnter: () => gsap.to('#bike-form-overlay', { opacity: 1, y: 0, duration: 0.9, ease: 'power3.out' }),
-        onLeave: () => gsap.to('#bike-form-overlay', { opacity: 0, y: -20, duration: 0.4 }),
-        onEnterBack: () => gsap.to('#bike-form-overlay', { opacity: 1, y: 0, duration: 0.6 }),
-        onLeaveBack: () => gsap.to('#bike-form-overlay', { opacity: 0, y: 20, duration: 0.4 }),
-      });
-      gsap.set('#bike-form-overlay', { y: 50 });
-
-      // PAGE 8: thank you
-      ScrollTrigger.create({
-        trigger: '#page-8', start: 'top center', end: 'bottom center',
-        onEnter: () => gsap.to('#thankyou-wrap', { opacity: 1, y: 0, duration: 1, ease: 'power3.out' }),
-        onLeave: () => gsap.to('#thankyou-wrap', { opacity: 0, duration: 0.4 }),
-        onEnterBack: () => gsap.to('#thankyou-wrap', { opacity: 1, duration: 0.7 }),
-        onLeaveBack: () => gsap.to('#thankyou-wrap', { opacity: 0, duration: 0.4 }),
-      });
-      gsap.set('#thankyou-wrap', { y: 50 });
-    }
-
-    const logLines = [
-      { text: 'Scanning 500+ registered shops...', cls: 'scan' },
-      { text: 'GPS signal acquired: Mumbai, MH', cls: 'scan' },
-      { text: 'Filtering by service: Exterior Wash', cls: 'scan' },
-      { text: 'Loading shop ratings database...', cls: 'scan' },
-      { text: 'AutoSpa Elite — 2.3 km — Rating 4.9', cls: 'ok' },
-      { text: 'ShineZone Pro — 3.8 km — Rating 4.7', cls: 'ok' },
-      { text: 'LuxCare Bandra — 4.2 km — Rating 4.6', cls: 'ok' },
-      { text: 'Best match: AutoSpa Elite Bandra', cls: 'ok' },
-      { text: 'Booking slot confirmed & reserved', cls: 'ok' },
-    ];
-    function runAILog() {
-      const log = document.getElementById('ai-log');
-      log.innerHTML = '';
-      logLines.forEach((l, i) => {
-        setTimeout(() => {
-          const el = document.createElement('div');
-          el.className = 'ai-log-line ' + l.cls;
-          el.textContent = l.text;
-          el.style.animationDelay = '0s';
-          log.appendChild(el);
-          if (i === logLines.length - 1) {
-            setTimeout(() => scrollToSection(5), 2000);
-          }
-        }, i * 400);
-      });
-    }
-
-    // Car service chips
-    document.querySelectorAll('#service-chips .chip').forEach(c => {
-      c.addEventListener('click', () => {
-        document.querySelectorAll('#service-chips .chip').forEach(x => x.classList.remove('active'));
-        c.classList.add('active');
-      });
-    });
-
-    // Bike service chips
-    document.querySelectorAll('#bike-chips .chip').forEach(c => {
-      c.addEventListener('click', () => {
-        document.querySelectorAll('#bike-chips .chip').forEach(x => x.classList.remove('active'));
-        c.classList.add('active');
-      });
-    });
-
-    function selectBikeType(el) {
-      document.querySelectorAll('.btc').forEach(x => x.classList.remove('active'));
-      el.classList.add('active');
-    }
-
-    function submitBooking() {
-      const name = document.getElementById('f-name').value;
-      if (!name) {
-        gsap.to('#form-overlay', { x: -8, duration: 0.07, repeat: 5, yoyo: true, onComplete: () => gsap.set('#form-overlay', { x: 0 }) });
-        return;
-      }
-      document.getElementById('conf-service').textContent = document.querySelector('#service-chips .chip.active')?.textContent || 'Exterior Wash';
-      document.getElementById('conf-slot').textContent = document.getElementById('f-time').value || '10:00 AM — 12:00 PM';
-      scrollToSection(4);
-    }
-
-    function submitBike() {
-      const name = document.getElementById('b-name').value;
-      if (!name) {
-        gsap.to('#bike-form-overlay', { x: -8, duration: 0.07, repeat: 5, yoyo: true, onComplete: () => gsap.set('#bike-form-overlay', { x: 0 }) });
-        return;
-      }
-      const brand = document.getElementById('b-brand').value || 'Bike';
-      const model = document.getElementById('b-model').value || '';
-      const ref = '#CR-' + Math.floor(Math.random() * 9000 + 1000);
-      document.getElementById('ty-ref').textContent = 'BOOKING REF: ' + ref + ' — ' + brand + ' ' + model;
-      scrollToSection(7);
-    }
-
-    function scrollToSection(idx) {
-      const max = document.body.scrollHeight - window.innerHeight;
-      const target = (idx / totalPages) * max + 10;
-      window.scrollTo({ top: target, behavior: 'smooth' });
-    }
-
-    function runLoader() {
-      const bar = document.getElementById('loader-bar');
-      const txt = document.getElementById('loader-text');
-      const msgs = ['Initializing 3D engine...', 'Loading studio environment...', 'Building vehicle geometry...', 'Calibrating lighting system...', 'Ready.'];
-      let pct = 0, mi = 0;
-      const iv = setInterval(() => {
-        pct += Math.random() * 18 + 5;
-        if (pct > 100) pct = 100;
-        bar.style.width = pct + '%';
-        const ni = Math.floor(pct / 25);
-        if (ni !== mi && ni < msgs.length) { mi = ni; txt.textContent = msgs[ni]; }
-        if (pct >= 100) {
-          clearInterval(iv);
-          setTimeout(() => {
-            gsap.to('#loader', {
-              opacity: 0, duration: 0.8, onComplete: () => {
-                document.getElementById('loader').style.display = 'none';
-                initGSAP();
-              }
-            });
-          }, 400);
-        }
-      }, 120);
-    }
-
-    window.addEventListener('load', runLoader);
-
-    document.querySelectorAll('button,a,.chip,.service-item,.dot,.btc').forEach(el => {
-      el.addEventListener('mouseenter', () => {
-        gsap.to(cur, { width: 24, height: 24, duration: 0.3 });
-        gsap.to(ring, { width: 60, height: 60, duration: 0.3 });
-      });
-      el.addEventListener('mouseleave', () => {
-        gsap.to(cur, { width: 12, height: 12, duration: 0.3 });
-        gsap.to(ring, { width: 36, height: 36, duration: 0.3 });
-      });
-    });
-  </script>
+/* ─── HOVER EFFECTS ON INTERACTIVE ELEMENTS ─── */
+document.querySelectorAll('button,a,.chip,.service-item,.dot').forEach(el=>{
+  el.addEventListener('mouseenter',()=>{
+    gsap.to(cur,{width:24,height:24,duration:0.3});
+    gsap.to(ring,{width:60,height:60,duration:0.3});
+  });
+  el.addEventListener('mouseleave',()=>{
+    gsap.to(cur,{width:12,height:12,duration:0.3});
+    gsap.to(ring,{width:36,height:36,duration:0.3});
+  });
+});
+</script>
 </body>
-
 </html>
